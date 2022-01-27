@@ -1,12 +1,13 @@
 Package: ecors
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Remote Sensing data acquisition and processing for ecology with Google Earth Engine
+Version: 0.9
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Frederico", "Takahashi", , "fredtaka@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-9410-7885 "))
+Description: It simplifies the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing the visualization of maps, data download and production of simple statistics commonly used in ecological studies. It aims to simplify the use of commands from the rgee package and the Google Earth Engine platform with a style of functions more familiar to R users who usually perform statistical analysis for ecological studies.
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+URL: https://github.com/fredtaka/ecors
+BugReports: https://github.com/fredtaka/ecors/issues
