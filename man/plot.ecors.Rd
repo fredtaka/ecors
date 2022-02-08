@@ -51,18 +51,18 @@ Options "filtered|mask" and "filtered+mask" show images from both collections. O
 }
 \examples{
 #get a ecors class object
-FAL.IBGE.JBB<-st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-test.retangles<-st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
-test.points<-st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
+FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
+test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 
 d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
     eval.area="site", projected=F, custom.crs=32723,
     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2021-01-01"),
-    bands.eval="B3", bands.vis=T, indices=c("NDVI"), resolution=30,
+    bands.vis=T, indices=c("NDVI"), resolution=30,
     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
 
-#ploting
+#plotting
 plot.ecors(x=d2020, ecors.type="mask", visualization="vis.bands", defaults=T,
            legend=T, bands=NULL, pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
 

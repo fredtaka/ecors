@@ -26,9 +26,9 @@
 #'
 #' @examples
 #' #get a mb.ecors class object
-#' FAL.IBGE.JBB<-st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-#' test.points<-st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
-#' test.retangles<-st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
+#' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
+#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
 #' mb2000_2010<-get.mb.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,

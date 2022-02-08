@@ -44,7 +44,7 @@
 #' Regardless of where you want to perform the analyses, all these geometries can be informed simultaneously so that these polygons can be used in the map visualization.
 #'
 #' @return Object of the "mb.ecors" class with metadata and pre-processed data to be used in the count.mb.ecors, dist.mb.ecors, plot.focal.mb.ecors, plot.mb.ecors or download.mb.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
-#' \itemize {
+#' \itemize{
 #' \item mb (MapBiomas image: years stored as bands),
 #' \item polig.mb0.gee (reference polygons),
 #' \item polig.mb1.gee (buffer1 polygons),
@@ -59,9 +59,9 @@
 #' @export
 #'
 #' @examples
-#' FAL.IBGE.JBB<-st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-#' test.points<-st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
-#' test.retangles<-st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
+#' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
+#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' mb2000_2010<-get.mb.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles,

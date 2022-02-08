@@ -34,7 +34,7 @@
 #'
 #'
 #' @return Object of the "ecors" class with metadata and pre-processed data to be used in the stats.ecors, plot.ecors or download.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
-#' \itemize {
+#' \itemize{
 #' \item colle (all images available in the period),
 #' \item colle.filt (images approved in get.ecors quality control),
 #' \item colle.mask (same as the previous one but with bad pixels masked),
@@ -51,15 +51,15 @@
 #' <https://www.usgs.gov/core-science-systems/nli/landsat/landsat-collection-1-level-1-quality-assessment-band?qt-science_support_page_related_con=0#qt-science_support_page_related_con> \cr
 #'
 #' @examples
-#' FAL.IBGE.JBB<-st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-#' test.points<-st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
-#' test.retangles<-st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
+#' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
+#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2021-01-01"),
-#'     bands.eval="B3", bands.vis=T, indices=c("NDVI"), resolution=30,
+#'     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
 #'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="month", composite="mean")
 #'
@@ -72,7 +72,7 @@
 
 get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.plots=0, eval.area="site",
                     projected=FALSE, custom.crs=NULL,
-                    collection, start, end, bands.eval, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
+                    collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
                     pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
                     cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
                     seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), sort.by="month", composite=NULL)
@@ -337,7 +337,11 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   end<-as.Date(end)
 
   if(start < periodo.sat$start | end > periodo.sat$end ){stop(paste("Selected period exceeds data availability . \n Collection",collection, "have data from", periodo.sat$start, "to",ifelse(periodo.sat$end>as.Date("2500-01-01"),"present (with delay)",periodo.sat$end)),".")}
+
+  if(is.null(bands.eval)&bands.vis==F&(is.null(indices)|length(indices)==0)){stop("Need to select bands, indices or set bands.vis = T")}
+  if(is.null(bands.eval)&bands.vis==F){bandas<-c()}
   if(is.null(bands.eval)){bands.eval<-d.vpar$bands}
+
   bandas<-bands.eval
   if ("EVI"%in%indices){bandas<-sort(unique(c(bandas,lista.bandas.indices$BLUE,lista.bandas.indices$RED,lista.bandas.indices$NIR)))}
   if ("NDVI"%in%indices){bandas<-sort(unique(c(bandas,lista.bandas.indices$RED,lista.bandas.indices$NIR)))}
@@ -416,7 +420,6 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
       points<-st_transform(points,crs=custom.crs)
       circles<-st_buffer(points,dist=buffer.points)
       circles<-st_transform(circles,crs=points.crs)
-      warning(paste("Objects points and circles was converted back to original points crs."))
     }
 
     circles<-circles[,c(id.column,ncol(circles))]
@@ -425,7 +428,7 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
     st_geometry(circles)<-"geometry"
     circles.gee<-sf_as_ee(circles)
     samples<-circles #se houver points e plots, vai corrigir adiante
-  } else {cat("\n Sem arquivo válido com points \n")}
+  } else {cat("\n No valid file with points \n")}
 
   #plots
   if(is.null(plots)){plots<-c()}
@@ -444,7 +447,6 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
         plots<-st_transform(plots,crs=custom.crs)
         plots.buf<-st_buffer(plots,dist=buffer.plots)
         plots.buf<-st_transform(plots.buf,crs=plots.crs)
-        warning(paste("Object plots was converted back to original plots crs."))
       }
 
       plots.buf[,ncol(plots.buf)+1]<-"plots.buffer"
@@ -455,7 +457,7 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
     names(plots.buf)[c(1,ncol(plots.buf))]<-c("id","type")
     st_geometry(plots.buf)<-"geometry"
     samples<-plots.buf #pode sobrescrever mas se houver points e plots, vai corrigir adiante
-  } else {cat("\n Sem arquivo válido com plots \n")}
+  } else {cat("\n No valid file with plots \n")}
 
   #Organizando objeto samples
   if(sum(class(points)=="sf",class(plots)=="sf")==2) {
@@ -488,14 +490,14 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   n.imagens.ori<-colle.ori$size()$getInfo()
   for (i in 1:n.imagens.ori){
     colle.ori.dates[i]<-colle.ori[[i]]$get("year_month_day")$getInfo()
-    cat("\n Imagem original (não filtrada)",i,":", format(colle.ori.dates[i]))
+    cat("\n Original image (before filtering)",i,":", format(colle.ori.dates[i]))
   }
 
   if(n.imagens.ori<2){stop("get.ecors needs at least 2 images to proceed. Increase start to end interval")}
 
-  if(is.null(unlist(seasons))==F){dates.inter<-colle.ori.dates[month(colle.ori.dates)%in%unlist(seasons)]} else {dates.inter<-colle.ori.dates}
+  if(is.null(unlist(seasons))==F){dates.inter<-colle.ori.dates[as.numeric(format(colle.ori.dates,format="%m"))%in%unlist(seasons)]} else {dates.inter<-colle.ori.dates}
   colle<-colle.ori$filter(ee$Filter$inList("year_month_day",ee$List(as.character(dates.inter))))#removendo meses que não são de interesse
-  cat(paste0("\nNumber of images in months of interest: ",length(dates.inter),"\nDatas: "),paste0("\n",dates.inter))
+  cat(paste0("\nNumber of images in months of interest: ",length(dates.inter)))
 
   if(n.imagens.ori<2){stop("get.ecors needs at least 2 images in months of interest to proceed. Increase start to end interval")}
 
@@ -700,15 +702,16 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   ###
 
   n.imagens<-pixelOK.filt$size()$getInfo()#quantidade de imagens selecionadas
-  if (n.imagens>0){cat("\n",n.imagens,"imagens selecionadas do total de",pixelOK$size()$getInfo(), "imagens disponíveis no período de interesse \n ")} else{stop("Nenhuma imagem selecionada no período informado com o nível de qualidade solicitado. Altere/amplie o período ou reduza o valor da variável pOK.")}
+  if (n.imagens>0){cat("\n",n.imagens,"selected images from a total of",pixelOK$size()$getInfo(), "images available in the period of interest \n ")} else{stop("No images selected in the chosen period with the requested quality level. Change/enlarge the period or reduce the value of the pOK argument.")}
 
   if(n.imagens<2){stop("get.ecors needs at least 2 images selected in quality control to proceed. Increase start to end interval or decrease quality parameters.")}
 
   #Lista de imagens filtrada
   lista.imagens<-c()
+  cat("\nImage codes:")
   for (i in 1:n.imagens){
     lista.imagens[i]<-pixelOK.filt[[i]]$get("system:index")$getInfo()
-    cat("\n Imagem",i,"de",n.imagens,":", lista.imagens[i])
+    cat("\n Image",i,"of",n.imagens,":", lista.imagens[i])
   }
 
   #Filtrando coleção
@@ -716,9 +719,11 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
 
   #Organizando: lista de datas filtrada
   OKdates<-as.Date("1900-01-01")
+  cat("\n\nImage dates:")
+
   for (i in 1:n.imagens){
     OKdates[i]<-ee$Date(colle.filt[[i]]$get('system:time_start'))$format("YYYY-MM-dd")$getInfo()
-    cat("\n Imagem",i,"de",n.imagens,":", format(OKdates[i]))
+    cat("\n Image",i,"of",n.imagens,":", format(OKdates[i]))
   }
 
   ##############################
@@ -765,8 +770,8 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
 
   # tabela de expectativas de dados (por mês)
   dates.table<-data.frame(date=seq(from=start,to=end,by="month"), season=NA, rep=0)
-  dates.table$year<-year(dates.table$date)
-  dates.table$month<-month(dates.table$date)
+  dates.table$year<-as.numeric(format(dates.table$date,format="%Y"))
+  dates.table$month<-as.numeric(format(dates.table$date,format="%m"))
   dates.table$season[dates.table$month%in%seasons$s1]<-"s1"
   dates.table$season[dates.table$month%in%seasons$s2]<-"s2"
   dates.table$season[dates.table$month%in%seasons$s3]<-"s3"
@@ -809,8 +814,8 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
 
   #imagens disponíveis com estações e repetições
   images.table<-data.frame(images=lista.imagens, OKdates=OKdates, season=NA, rep=NA)
-  images.table$year<-year(images.table$OKdates)
-  images.table$month<-month(images.table$OKdates)
+  images.table$year<-as.numeric(format(images.table$OKdates,format="%Y"))
+  images.table$month<-as.numeric(format(images.table$OKdates,format="%m"))
   images.table$season[images.table$month%in%seasons$s1]<-"s1"
   images.table$season[images.table$month%in%seasons$s2]<-"s2"
   images.table$season[images.table$month%in%seasons$s3]<-"s3"
@@ -860,8 +865,9 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
 
   ### Máscara e metadados com estação e repetição
   colle.mask<-colle.filt
+  cat("\n")
   for (i in 1:n.imagens){
-    cat("\n Aplicando máscara e completando metadados: Imagem",i,"de",n.imagens,"- processando às",format(Sys.time(),"%H:%M"))
+    cat("\n Masking images and adding information in the metadata: Image",i,"of",n.imagens,"- processing at",format(Sys.time(),"%H:%M"))
     colle.mask[[i]]<-colle.mask[[i]]$updateMask(pixelOK.filt[[i]])
     if(is.null(composite)==F){colle.mask[[i]]<-colle.mask[[i]]$set("rep_season",images.table$rep.season[i])}
   } #rep_season não será gravada nos metadados caso composição=NULL

@@ -9,5 +9,15 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Depends:
+  R (>= 4.1.2), rgee (>= 1.1.2), sf (>= 1.0-5)
+Imports:
+  rgee,
+  rgeeExtra,
+  googledrive,
+  sf,
+  dplyr
+Suggests:
+  readODS
 URL: https://github.com/fredtaka/ecors
 BugReports: https://github.com/fredtaka/ecors/issues
