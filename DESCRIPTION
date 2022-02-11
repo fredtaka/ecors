@@ -16,8 +16,7 @@ Imports:
   rgeeExtra,
   googledrive,
   sf,
-  dplyr
-Suggests:
+  dplyr,
   readODS
 URL: https://github.com/fredtaka/ecors
 BugReports: https://github.com/fredtaka/ecors/issues

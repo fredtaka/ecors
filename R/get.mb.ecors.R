@@ -1,24 +1,3 @@
-# pasta<-"/home/fred/Documentos/PELD 4/GIS" #este caminho não deve ser terminado com /
-# poligonos<-st_read(dsn=file.path(pasta,"poligonos landuse de teste(3 poligonos).gpkg"))
-# sitio<-st_read(dsn=file.path(pasta,"FAL.IBGE.JBB.gpkg"))
-# pontos<-st_read(dsn=file.path(pasta,"Pontos de teste.gpkg"))
-# parcelas<-st_read(dsn=file.path(pasta,"Parcelas de teste.gpkg"))
-
-#id.column: número da coluna com ID. Deve ser válido para todos os objetos sf apresentados; geometria deve ser a última coluna
-
-# collection.mb<-6 #opções disponíveis são 5 e 6. Selecione a mais recente (maior número) se não houver motivo contrário.
-# evaluate<-"surroundings.site" #opções: "surroundings.samples", "surroundings.site", "inside.polygons"
-# #obs. opção "polígono" considera o interior do polígono e, caso especificado, adicionado da área do buffer
-# cumulative.surroundings<-T # T: entorno2 incluirá área do entorno1, entorno3 incluirá a área dos entornos1 e entorno2;
-# # F: cada área de entorno não terá área em comum com os demais.
-#
-# buffer1<-0 # distância em metros para construção do buffer do entorno imediato do site ou das sampless
-# buffer2<-0 # distância em metros para construção do buffer do entorno intermediário do site ou das sampless
-# buffer3<-0 # distância em metros para construção do buffer do entorno distante do site ou das sampless
-# #obs. se quiser só 1 buffer, use somente o buffer1 independente do valor. Se quiser só 2 buffers, use o buffer1 e buffer2
-# #Buffers não utilizados podem ser deixados com valor NA
-
-
 #' Get MapBiomas data to ecors
 #'
 #'Get MapBiomas data from Google Earth Engine for your study site and integrate with study polygons.
@@ -62,13 +41,12 @@
 #' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
-
+#'
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' mb2000_2010<-get.mb.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
 #'      collection.mb=6, years=c(2000,2010), resolution=30, evaluate="surroundings.site",
 #'      buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
-
 #'
 #'
 get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.column=1, projected=FALSE, custom.crs=NULL, collection.mb=6, years, resolution=30, evaluate,
@@ -83,6 +61,11 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     stop("Argument evaluate must be surroundings.samples, surroundings.site or inside.polygons.")}
 
   if(collection.mb%in%c(5,6)==F){stop("Supported MapBiomas collections are: 5 and 6 (use the latest if you do not reasons to do otherwise).")}
+
+  #zero or NULL will disable a buffer
+  if(is.null(buffer1)){buffer1<-0}
+  if(is.null(buffer2)){buffer2<-0}
+  if(is.null(buffer3)){buffer3<-0}
 
   if(projected==F & is.null(custom.crs) & (buffer1>0 | buffer2>0 | buffer3>0 )){
     stop("Is not possible to use buffers with unprojected spatial objects (site, points, plots or polygons). Project these spatial objects prior run get.mb.ecors or provide custom.crs for projection.")}
@@ -123,14 +106,12 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   if(collection.mb==5){
     mb<-ee$Image("projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1")
     legend.mb<-read.csv(system.file("extdata","MB.col5.legend.csv",package="ecors"))
-    legend.mb<-legend.mb%>%setorder(cols="lu.class")%>%filter(lu.class!="-")
     if(sum(years<1985)+sum(years>2019)>0){stop("\nDatas para Coleção 5 devem ser entre 1985 e 2019")}
   } #legenda obtida de: https://github.com/mapbiomas-brazil/integration-toolkit/blob/master/mapbiomas-integration-toolkit.js
 
   if(collection.mb==6){
     mb<-ee$Image("projects/mapbiomas-workspace/public/collection6/mapbiomas_collection60_integration_v1")
     legend.mb<-read.csv(system.file("extdata","MB.col6.legend.csv",package="ecors"))
-    legend.mb<-legend.mb%>%setorder(cols="lu.class")%>%filter(lu.class!="-")
     if(sum(years<1985)+sum(years>2020)>0){stop("\nDatas para Coleção 6 devem ser entre 1985 e 2020")}
   }
 

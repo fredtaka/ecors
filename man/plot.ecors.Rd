@@ -39,7 +39,13 @@
 \item{image.gamma}{gamma correction.}
 }
 \value{
-
+Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit):
+\itemize{
+\item img.samples: sample polygons,
+\item img.site: site polygon,
+\item img(i): plot object of a raster image (one object per image),
+\item imgB(i): additional plot object of a raster image (one object per image) produced when selected "filtered|mask" or "filtered+mask",
+\item leg: legend.}
 }
 \description{
 Plot Google Earth Engine images processed by get.ecors along with site and sample polygons.
@@ -67,6 +73,6 @@ plot.ecors(x=d2020, ecors.type="mask", visualization="vis.bands", defaults=T,
            legend=T, bands=NULL, pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
 
 plot.ecors(x=d2020, ecors.type="mask", visualization="custom", defaults=F,
-           legend=T, bands="NDVI", pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
+           legend=T, bands="NDVI", pixel.min=-1, pixel.max=1, image.gamma=NULL)
 
 }

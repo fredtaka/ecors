@@ -2,6 +2,8 @@
 
 S3method(count,mb.ecors)
 S3method(plot,ecors)
+S3method(plot,focal.mb.ecors)
+S3method(plot,mb.ecors)
 export(dist.mb.ecors)
 export(download.ecors)
 export(download.mb.ecors)

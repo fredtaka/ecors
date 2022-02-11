@@ -497,7 +497,7 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
 
   if(is.null(unlist(seasons))==F){dates.inter<-colle.ori.dates[as.numeric(format(colle.ori.dates,format="%m"))%in%unlist(seasons)]} else {dates.inter<-colle.ori.dates}
   colle<-colle.ori$filter(ee$Filter$inList("year_month_day",ee$List(as.character(dates.inter))))#removendo meses que não são de interesse
-  cat(paste0("\nNumber of images in months of interest: ",length(dates.inter)))
+  cat(paste0("\n\nNumber of images in months of interest: ",length(dates.inter)))
 
   if(n.imagens.ori<2){stop("get.ecors needs at least 2 images in months of interest to proceed. Increase start to end interval")}
 

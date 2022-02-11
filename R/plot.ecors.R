@@ -19,6 +19,14 @@
 #' Options "filtered|mask" and "filtered+mask" show images from both collections. Option 2 and 3 show images from both collections, in the first the images are toggled with the slider and in the last option the images from both collections are stacked. in the first the images are toggled with the slider and in the last option the images from both collections are stacked
 #'
 #' @return
+#' Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit):
+#' \itemize{
+#' \item img.samples: sample polygons,
+#' \item img.site: site polygon,
+#' \item img(i): plot object of a raster image (one object per image),
+#' \item imgB(i): additional plot object of a raster image (one object per image) produced when selected "filtered|mask" or "filtered+mask",
+#' \item leg: legend.}
+#'
 #' @export
 #' @import rgee
 #' @import googledrive
@@ -43,7 +51,7 @@
 #'            legend=T, bands=NULL, pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
 #'
 #' plot.ecors(x=d2020, ecors.type="mask", visualization="custom", defaults=F,
-#'            legend=T, bands="NDVI", pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
+#'            legend=T, bands="NDVI", pixel.min=-1, pixel.max=1, image.gamma=NULL)
 #'
 plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults=T, legend=F, bands=NULL,
                      pixel.min=NULL, pixel.max=NULL, image.gamma=NULL){
@@ -57,7 +65,7 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
   } else {
     poligono<-samples.gee$geometry()$transform()#converte para WG84 (default)
   }
-    centro<-poligono$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
+  centro<-poligono$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
 
   if(ecors.type%in%c("original","filtered","mask","filtered|mask","filtered+mask","composite")==F){stop("Invalid option to argument ecors.type")}
 
@@ -72,8 +80,8 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
   if(visualization!="custom" & is.null(bands)==F){
     stop("Is not possible to set visualization to vis.bands or pan or pan.sharpening and choose custom bands")}
 
-    if(visualization=="custom" & is.null(bands)){
-      stop("Is not possible to set visualization to custom and without inform custom bands")}
+  if(visualization=="custom" & is.null(bands)){
+    stop("Is not possible to set visualization to custom and without inform custom bands")}
 
 
   if(defaults==T & is.null(bands)==F){
@@ -81,6 +89,9 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
 
   if(defaults==T & (is.null(pixel.min)==F | is.null(pixel.max)==F | is.null(image.gamma)==F)){
     stop("Is not possible to set defaults=T and choose custom values to pixel.min, pixel.max or image.gamma")}
+
+  if(legend==T & (defaults==F & (is.null(pixel.min) | is.null(pixel.max))) ){
+    stop("To get legend you need to use defaults = T or specify pixel.min and pixel.max values.")}
 
   Map$setCenter(centro[1],centro[2],zoom)
   n.imagens<-nrow(images.table) # número de imagens filtradas
@@ -160,7 +171,11 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
     if(visualization=="pan"){vpar<-d.vpar.pan}
     if(visualization=="pan.sharpening"){vpar<-list(min=0,max=1)}
     if(is.null(d.vpar$reescalonar)==F){
-      FUNreescalonar<-function(imagem){imagem$multiply(vpar$reescalonar$multiplica)$add(vpar$reescalonar$soma)}
+      multiplica<-vpar$reescalonar$multiplica #list '$' is incompatible with map functions
+      soma<-vpar$reescalonar$soma
+      vpar<-within(vpar,rm(reescalonar))
+
+      FUNreescalonar<-function(imagem){imagem$multiply(multiplica)$add(soma)}
       colle.plot<-colle.plot$map(FUNreescalonar)
       if(ecors.type=="filtered|mask" | ecors.type=="filtered+mask"){
         colle.plotB<-colle.plotB$map(FUNreescalonar)}
@@ -190,6 +205,12 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
     if(is.null(image.gamma)){image.gamma<-1}
     vpar<-list(bands=bands,min=pixel.min,max=pixel.max,gamma=image.gamma)}
 
+  #edit vpar: remove NULL arguments of defaults==F
+  if(defaults==F){
+    if(is.null(vpar$min)|is.null(vpar$max)){vpar<-within(vpar,rm(min,max))}
+    if(is.null(vpar$gamma)){vpar<-within(vpar,rm(gamma))}
+  }
+
   cat(paste0("\n Available bands/indices:"),paste0(c(bands.used,indices)))
 
   comando.visuali<-c()
@@ -210,10 +231,27 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
     }
   }
 
-  img.samples<<-Map$addLayer(samples.gee,name="Samples") # atribuindo ao .GlobalEnv
-  img.site<<-Map$addLayer(site.gee,name="Site") # atribuindo ao .GlobalEnv
+  if(is.null(site.gee)==F){
+    img.site<<-Map$addLayer(site.gee,name="Site") # atribuindo ao .GlobalEnv
+  }
 
-  comando.visuali<-paste0(comando.visuali,"+img.site+img.samples")
+  if(is.null(samples.gee)==F){
+    img.samples<<-Map$addLayer(samples.gee,name="Samples") # atribuindo ao .GlobalEnv
+  }
+
+  if(is.null(site.gee)==F & is.null(samples.gee)==F){
+    comando.visuali<-paste0(comando.visuali,"+img.site+img.samples")
+  }
+
+  if(is.null(site.gee)==T & is.null(samples.gee)==F){
+    comando.visuali<-paste0(comando.visuali,"+img.samples")
+  }
+
+  if(is.null(site.gee)==F & is.null(samples.gee)==T){
+    comando.visuali<-paste0(comando.visuali,"+img.site")
+  }
+  #is not possible plot without site or samples
+
 
   if(legend==T){
     leg<<-Map$addLegend(vpar)

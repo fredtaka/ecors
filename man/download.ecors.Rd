@@ -53,7 +53,7 @@ Option "mask" use same images as the previous one but with bad pixels masked, "c
 If more than one reference type is give for the extent (ref.site, ref.samples, new.ref.poly) the extent that encompasses all these geometries will be used.
 }
 \examples{
-#get a ecors class object
+#Get a ecors class object
 FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
 test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
@@ -65,9 +65,9 @@ d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, bu
     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
 
-#download
-download.ecors(x=d2020, ecors.type="composite",subset=NULL,vis.bands=T,
-   new.list.bands=NULL,ref.site=T,ref.samples=T,new.ref.poly=NULL,exp.degree=0.05,
+#Download
+download.ecors(x=d2020, ecors.type="composite",vis.bands=T,
+   new.list.bands=NULL,ref.site=T,ref.samples=T,exp.degree=0.05,
    images.folder=getwd(),clear.prov=F)
 
 }

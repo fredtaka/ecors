@@ -28,7 +28,7 @@
 #' @import dplyr
 #'
 #' @examples
-#' #get a ecors class object
+#' #Get a ecors class object
 #' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
 #' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
@@ -40,9 +40,9 @@
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
 #'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
 #'
-#' #download
-#' download.ecors(x=d2020, ecors.type="composite",subset=NULL,vis.bands=T,
-#'    new.list.bands=NULL,ref.site=T,ref.samples=T,new.ref.poly=NULL,exp.degree=0.05,
+#' #Download
+#' download.ecors(x=d2020, ecors.type="composite",vis.bands=T,
+#'    new.list.bands=NULL,ref.site=T,ref.samples=T,exp.degree=0.05,
 #'    images.folder=getwd(),clear.prov=F)
 #'
 download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NULL,ref.site=T,ref.samples=T,new.ref.poly=NULL,exp.degree=0.05,images.folder=getwd(),clear.prov=F){
@@ -54,6 +54,9 @@ download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NU
   if(substr(images.folder,nchar(images.folder),nchar(images.folder))=="/"){images.folder<-substr(images.folder,1,nchar(images.folder)-1)}
 
   if(ecors.type%in%c("original","filtered","mask","composite")==F){stop("Invalid option on ecors.type. Must be: original, filtered, mask or composite.")}
+
+  if(ecors.type=="composite" & is.null(colle.mask.compo)){stop("Argument ecors.type cannot be composite because no composition was performed when running get.ecors")}
+
   if(clear.prov==T){
     warning(call.=F,immediate.=T, "clear.prov=T \nThe entire ecors_temp folder will be erased in your Google Drive account at the end of this function! \nOld data in ecors_temp also will be lost.")
     Sys.sleep(5)}

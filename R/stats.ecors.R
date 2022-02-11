@@ -37,7 +37,6 @@
 #' @import googledrive
 #' @import sf
 #' @import dplyr
-#'
 
 stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK=NULL,prop.pixelOK=0.9),
                       summarizing="all", by.image.save=T, summary.save=T,
@@ -146,6 +145,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
     }
     return(nomes)
   }
+
+  cat("\n\n")
 
   names(tab.OK.samples)<-f.codif.colunas(tab.OK.samples)
   if(by.image.save==T | summary.save==T){
