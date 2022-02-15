@@ -87,7 +87,7 @@ get.ecors(
 
 \item{sort.by}{should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.}
 
-\item{composite}{method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL}
+\item{composite}{method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL (disable composition).}
 }
 \value{
 Object of the "ecors" class with metadata and pre-processed data to be used in the stats.ecors, plot.ecors or download.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
@@ -111,7 +111,7 @@ test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="eco
 # Get data (projecting to UTM 32S zone to performe buffer operations)
 d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
     eval.area="site", projected=F, custom.crs=32723,
-    collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2021-01-01"),
+    collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="month", composite="mean")

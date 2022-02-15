@@ -28,7 +28,7 @@
 #' @param dmax.shadow set the maximum distance that CDI Algorithm will search for clouds. Large values take a lot of processing time or may crash Google Earth Engine. Value in meters (in multiples of 100 m).
 #' @param seasons month allocation (numerical form) in up to four seasons. Use the list structure list(s1=c(), s2=c(), s3=c(), s4=c()) keeping the items you don't want to use empty. More information in the exemples section.
 #' @param sort.by should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.
-#' @param composite method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL
+#' @param composite method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL (disable composition).
 #'
 #' @details
 #'
@@ -58,7 +58,7 @@
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
-#'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2021-01-01"),
+#'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
 #'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="month", composite="mean")
@@ -422,10 +422,11 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
       circles<-st_transform(circles,crs=points.crs)
     }
 
-    circles<-circles[,c(id.column,ncol(circles))]
-    circles[,ncol(circles)+1]<-"circles"
-    names(circles)[c(1,ncol(circles))]<-c("id","type")
+    names(circles)[names(circles)==attr(circles,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
     st_geometry(circles)<-"geometry"
+    names(circles)[id.column]<-"id"
+    circles<-circles[,id.column]
+    circles$type<-"circles"
     circles.gee<-sf_as_ee(circles)
     samples<-circles #se houver points e plots, vai corrigir adiante
   } else {cat("\n No valid file with points \n")}
@@ -433,6 +434,12 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   #plots
   if(is.null(plots)){plots<-c()}
   if(sum(class(plots)=="sf")){
+
+    names(plots)[names(plots)==attr(plots,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
+    st_geometry(plots)<-"geometry"
+    names(plots)[id.column]<-"id"
+    plots<-plots[,id.column]
+
     if (buffer.plots>0){
       if(projected==F & is.null(custom.crs)){
         stop(print("You need to project your spatial objects that you intend to apply buffers before run get.ecors or provide custom.crs parameter"))
@@ -449,23 +456,20 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
         plots.buf<-st_transform(plots.buf,crs=plots.crs)
       }
 
-      plots.buf[,ncol(plots.buf)+1]<-"plots.buffer"
+      plots.buf$type<-"plots.buffer"
+
     } else {
-      plots<-plots[,c(id.column,ncol(plots))]
       plots.buf<-plots
-      plots.buf[,ncol(plots.buf)+1]<-"plots"}
-    names(plots.buf)[c(1,ncol(plots.buf))]<-c("id","type")
-    st_geometry(plots.buf)<-"geometry"
+      plots.buf$type<-"plots"}
+
     samples<-plots.buf #pode sobrescrever mas se houver points e plots, vai corrigir adiante
   } else {cat("\n No valid file with plots \n")}
 
   #Organizando objeto samples
   if(sum(class(points)=="sf",class(plots)=="sf")==2) {
     samples<-rbind(circles,plots.buf)
-    st_geometry(samples)<-"geometry"
   }
   area.m2<-as.numeric(st_area(samples)) #para metadata
-
 
   if(eval.area=="site"){
     if(is.null(site) || "sf" %in% class(site)==F){stop(print("When eval.area=\"site\" you need to set a sf object to site"))}

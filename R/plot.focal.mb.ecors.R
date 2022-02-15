@@ -39,8 +39,8 @@
 #'      collection.mb=6, years=c(2000,2010), resolution=30, evaluate="surroundings.site",
 #'      buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
 #'
-#'#Plotting
-#'plot.focal.mb.ecors(x=mb2000_2010,window.radius=80)
+#' #Plotting
+#' plot.focal.mb.ecors(x=mb2000_2010,window.radius=80)
 
 
 plot.focal.mb.ecors<-function(x,window.radius,zoom=12,legend=T){

@@ -11,7 +11,10 @@ stats.ecors(
   summarizing = "all",
   by.image.save = T,
   summary.save = T,
-  stats = list(mean = T, median = T, sd = T),
+  stats = list(mean = T, median = T, sd = T, count = F),
+  lower.cutoff = NULL,
+  upper.cutoff = NULL,
+  bands.index.subset = NULL,
   spreadsheet.folder = getwd()
 )
 }
@@ -28,12 +31,18 @@ stats.ecors(
 
 \item{summary.save}{save a csv file with descriptive statistics summarizing all the images?}
 
-\item{stats}{enables/disables the calculation of mean, median or standard deviation (sd).}
+\item{stats}{enables/disables the calculation of mean, median, standard deviation (sd) or count (of pixels in the range of values between lower.cutoff and upper.cutoff).}
+
+\item{lower.cutoff}{Lower threshold values to ignore pixels in all stats (required for count). It must be a vector with a size equal to the number of bands/indexes to be analyzed.}
+
+\item{upper.cutoff}{Upper threshold values to ignore pixels in all stats (required for count). It must be a vector with a size equal to the number of bands/indexes to be analyzed.}
+
+\item{bands.index.subset}{Subset of bands to use for statistics.}
 
 \item{spreadsheet.folder}{local folder to save csv files.}
 }
 \value{
-List with result tables and metadata. If enabled, csv files will be saved with tables (two for each descriptive statistics): results.mean.samples.csv, summary.mean.samples.csv, results.median.samples.csv, summary.median.samples.csv, results.sd.samples.csv, summary.sd.samples.csv.
+List with result tables and metadata. If enabled, csv files will be saved with tables (two for each descriptive statistics): results.mean.samples.csv, summary.mean.samples.csv, results.median.samples.csv, summary.median.samples.csv, results.sd.samples.csv, summary.sd.samples.csv, results.count.samples.csv, summary.count.samples.csv.
 }
 \description{
 Performs descriptive statistics on study polygons at defined sampling periods.
@@ -46,12 +55,22 @@ test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors
 
 d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
     eval.area="site", projected=F, custom.crs=32723,
-    collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2021-01-01"),
-    bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
+    collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
+    bands.eval=c("SR_B3","SR_B4"), bands.vis=F, indices=c("NDVI"), resolution=30,
     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
 
-resp<-stats.ecors(x=d2020, edge.pixels="weighted", remove.samples=list(num.pixelOK=10,prop.pixelOK=0.8),
+allpixels<-stats.ecors(x=d2020, edge.pixels="weighted", remove.samples=list(num.pixelOK=10,prop.pixelOK=0.8),
                   summarizing="all", by.image.save=T, summary.save=T,
-                  stats=list(mean=T,median=F,sd=F),spreadsheet.folder=getwd() )
+                  stats=list(mean=T,median=F,sd=F,count=F),spreadsheet.folder=getwd() )
+
+rangepixels<-stats.ecors(x=d2020, edge.pixels="weighted", remove.samples=list(num.pixelOK=10,prop.pixelOK=0.8),
+                  summarizing="all", by.image.save=T, summary.save=T,
+                  stats=list(mean=T,median=F,sd=F,count=T), lower.cutoff=c(9000,8500), upper.cutoff=c(10000,10000), bands.index.subset=c("SR_B3","SR_B4"),
+                  spreadsheet.folder=getwd() )
+
+
+}
+\references{
+https://developers.google.com/earth-engine/guides/reducers_weighting
 }
