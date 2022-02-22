@@ -1,10 +1,10 @@
 Package: ecors
 Title: Remote Sensing data acquisition and processing for ecology with Google Earth Engine
-Version: 0.9
+Version: 0.9.1
 Authors@R: 
     person("Frederico", "Takahashi", , "fredtaka@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9410-7885 "))
-Description: It simplifies the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing the visualization of maps, data download and production of simple statistics commonly used in ecological studies. It aims to simplify the use of commands from the rgee package and the Google Earth Engine platform with a style of functions more familiar to R users who usually perform statistical analysis for ecological studies.
+Description: It simplifies the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing the visualization of maps, data download and production of simple statistics commonly used in ecological studies. It aims to simplify the use of commands from the rgee package and the Google Earth Engine platform with a style of functions more familiar to R users who usually perform statistical analysis for ecological studies. Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -51,11 +51,10 @@ download.mb.ecors<-function(x, exp.degree=0.05, images.folder=getwd(), clear.pro
     as.vector()+c(-exp.degree,-exp.degree,exp.degree,exp.degree)
   poli.ext.mb.gee<-ee$Geometry$Rectangle(coords=poli.ext.mb,proj="EPSG:4326")
 
-  mb.anos<-mb$select(paste0("classification_",years))
 
   #download propriamente dito
   gdrive<-ee_image_to_drive(
-    image = mb.anos,
+    image = mb,
     folder = "rgee_prov",
     region = poli.ext.mb.gee)
 

@@ -19,7 +19,8 @@ get.mb.ecors(
   buffer1 = 0,
   buffer2 = 0,
   buffer3 = 0,
-  cumulative.surroundings = F
+  cumulative.surroundings = F,
+  online.storage = "drive"
 )
 }
 \arguments{
@@ -49,9 +50,11 @@ get.mb.ecors(
 
 \item{buffer2}{middle buffer radius (m).}
 
-\item{buffer3}{farthest buffer radius (m)}
+\item{buffer3}{farthest buffer radius (m).}
 
 \item{cumulative.surroundings}{should the area of each buffer be cumulative with those contained in them? (buffer3 should contain buffer2? buffer2 should contain buffer1?)}
+
+\item{online.storage}{select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.}
 }
 \value{
 Object of the "mb.ecors" class with metadata and pre-processed data to be used in the count.mb.ecors, dist.mb.ecors, plot.focal.mb.ecors, plot.mb.ecors or download.mb.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr

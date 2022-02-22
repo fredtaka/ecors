@@ -31,7 +31,8 @@ get.ecors(
   dmax.shadow = NULL,
   seasons = list(s1 = c(), s2 = c(), s3 = c(), s4 = c()),
   sort.by = "month",
-  composite = NULL
+  composite = NULL,
+  online.storage = "drive"
 )
 }
 \arguments{
@@ -88,6 +89,8 @@ get.ecors(
 \item{sort.by}{should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.}
 
 \item{composite}{method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL (disable composition).}
+
+\item{online.storage}{select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.}
 }
 \value{
 Object of the "ecors" class with metadata and pre-processed data to be used in the stats.ecors, plot.ecors or download.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr

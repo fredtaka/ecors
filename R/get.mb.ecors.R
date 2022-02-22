@@ -15,8 +15,9 @@
 #' @param evaluate indicate whether analysis should be performend on the "surroundings.samples", "surroundings.site" or "inside.polygons"
 #' @param buffer1 nearest buffer radius (m).
 #' @param buffer2 middle buffer radius (m).
-#' @param buffer3 farthest buffer radius (m)
+#' @param buffer3 farthest buffer radius (m).
 #' @param cumulative.surroundings should the area of each buffer be cumulative with those contained in them? (buffer3 should contain buffer2? buffer2 should contain buffer1?)
+#' @param online.storage select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.
 #'
 #' @details
 #' Sites, plots and points represent places where you want to know the effect of land use carried out in the surroundings (buffer zones). If you want to define the area within which the land use will be evaluated, use the polygons option. For site, points and parcels it is necessary to inform at least one buffer size. \cr
@@ -50,22 +51,29 @@
 #'
 #'
 get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.column=1, projected=FALSE, custom.crs=NULL, collection.mb=6, years, resolution=30, evaluate,
-                       buffer1=0, buffer2=0, buffer3=0, cumulative.surroundings=F){
+                       buffer1=0, buffer2=0, buffer3=0, cumulative.surroundings=F, online.storage="drive"){
 
   ### Organizando
   get.mb.ecor.date.time<-Sys.time() #para identificar a data/hora de início de execução nos arquivos de saída
 
-  ee_Initialize(user = 'ndef', drive = TRUE)
+  if(is.null(online.storage)){ee_Initialize(user = 'ndef', drive = F, gcs = F)}
+  if(online.storage=="gcs"){ee_Initialize(user = 'ndef', drive = F, gcs = T)}
+  if(online.storage=="drive"){ee_Initialize(user = 'ndef', drive = T, gcs = F)}
+
+
+  if(collection.mb%in%c(5,6)==F){stop("Currently, only MapBiomas collections 5 and 6 are supported (use the latest if you do not reasons to do otherwise).")}
 
   if(evaluate%in%c("surroundings.samples", "surroundings.site", "inside.polygons")==F){
     stop("Argument evaluate must be surroundings.samples, surroundings.site or inside.polygons.")}
-
-  if(collection.mb%in%c(5,6)==F){stop("Supported MapBiomas collections are: 5 and 6 (use the latest if you do not reasons to do otherwise).")}
 
   #zero or NULL will disable a buffer
   if(is.null(buffer1)){buffer1<-0}
   if(is.null(buffer2)){buffer2<-0}
   if(is.null(buffer3)){buffer3<-0}
+
+  if(evaluate%in%c("surroundings.samples", "surroundings.site") & !(buffer1>0 | buffer2>0 | buffer3>0 )){
+    stop(print("Need to specify buffer values to use evaluate as surroundings.samples or surroundings.site"))
+  }
 
   if(projected==F & is.null(custom.crs) & (buffer1>0 | buffer2>0 | buffer3>0 )){
     stop("Is not possible to use buffers with unprojected spatial objects (site, points, plots or polygons). Project these spatial objects prior run get.mb.ecors or provide custom.crs for projection.")}
@@ -75,34 +83,63 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     site.gee<-sf_as_ee(site)
   } else {site.gee<-NULL}
 
-  if(is.null(points)==F){
-    if(is.null(custom.crs)){points<-st_transform(points,crs=custom.crs)}
-    if(projected!=T & is.null(custom.crs)){ stop(print("You need to project points object before run get.mb.ecors or provide custom.crs parameter for projection."))}
-    circles<-st_buffer(points,dist=0.5)
-    cat("\n Points converted to 1 m diameter circles. \n")
-    circles<-circles[,c(id.column,ncol(circles))]
-    circles[,ncol(circles)+1]<-"circles"
-    names(circles)[c(1,ncol(circles))]<-c("id","type")
+
+  samples<-NULL
+
+  #points->circles
+  if(sum(class(points)=="sf")) {
+
+    if(projected==F & is.null(custom.crs)){
+      stop(print("You need to project your spatial objects with points before run get.mb.ecors or provide custom.crs parameter"))
+    }
+
+    if(projected==T & is.null(custom.crs)){
+      circles<-st_buffer(points,dist=0.5) #here is different from get.ecors
+    }
+
+    if(is.null(custom.crs)==F){
+      points.crs<-st_crs(points)
+      points<-st_transform(points,crs=custom.crs)
+      circles<-st_buffer(points,dist=0.5)
+      circles<-st_transform(circles,crs=points.crs)
+    }
+
+    cat("\n Points converted to 1 m diameter circles. \n") #here is different from get.ecors
+
+    names(circles)[names(circles)==attr(circles,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
     st_geometry(circles)<-"geometry"
+    names(circles)[id.column]<-"id"
+    circles<-circles[,id.column]
+    circles$type<-"circles"
+    circles.gee<-sf_as_ee(circles)
     samples<-circles #se houver points e plots, vai corrigir adiante
-    samples.gee<-sf_as_ee(samples)
-  }
+  } else {cat("\n No valid file with points \n")}
 
-  if(is.null(plots)==F){
-    plots<-plots[,c(id.column,ncol(plots))]
-    plots[,ncol(plots)+1]<-"plots"
-    names(plots)[c(1,ncol(plots))]<-c("id","type")
+
+  #plots (several differences from get.ecors: do not apply buffer here)
+  if(sum(class(plots)=="sf")){
+
+    names(plots)[names(plots)==attr(plots,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
     st_geometry(plots)<-"geometry"
-    if(is.null(custom.crs)){plots<-st_transform(plots,crs=custom.crs)}
-    if(is.null(points)==F){samples<-rbind(circles,plots)}else{samples<-plots}
-    samples.gee<-sf_as_ee(samples) #sobreescrevendo objeto potencialmente criado para points
+    names(plots)[id.column]<-"id"
+    plots<-plots[,id.column]
+    plots$type<-"plots"
+    samples<-plots #pode sobrescrever mas se houver points e plots, vai corrigir adiante
+  } else {cat("\n No valid file with plots \n")}
+
+
+  #samples (consolidanting)
+  if(sum(class(points)=="sf",class(plots)=="sf")==2) {
+    samples<-rbind(circles,plots)
   }
+  if(is.null(samples)){samples.gee<-NULL} else {samples.gee<-sf_as_ee(samples)}
 
-  if(is.null(points)&is.null(plots)){samples.gee<-NULL}
 
+  #polygons
   if(is.null(polygons)==F){polygons.gee<-sf_as_ee(polygons)
   } else {polygons.gee<-NULL}
 
+  #MapBiomas
   if(collection.mb==5){
     mb<-ee$Image("projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1")
     legend.mb<-read.csv(system.file("extdata","MB.col5.legend.csv",package="ecors"))
@@ -115,6 +152,8 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     if(sum(years<1985)+sum(years>2020)>0){stop("\nDatas para Coleção 6 devem ser entre 1985 e 2020")}
   }
 
+  mb<-mb$select(paste0("classification_",years))
+
   mb<<-mb
 
   palette.mb<-legend.mb
@@ -122,13 +161,6 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     if(i%in%palette.mb$pixel.value ==F){palette.mb<-rbind(palette.mb,data.frame(color="#ffffff",pixel.value=i,lu.class=paste0("NA",i)))}
   }
   palette.mb<-palette.mb%>%arrange(pixel.value)
-
-  #To get center
-  if(evaluate=="surroundings.site"){center.poly.transf<-site.gee$geometry(1)$transform()}
-  if(evaluate=="surroundings.samples"){center.poly.transf<-samples.gee$geometry(1)$transform()}
-  if(evaluate=="inside.polygons"){center.poly.transf<-polygons$geometry(1)$transform()}
-
-  center<-center.poly.transf$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
 
   if(is.numeric(buffer1)==F){buffer1<-0}
   if(is.numeric(buffer2)==F){buffer2<-0}
@@ -188,6 +220,12 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     })
   }
 
+  #areas
+  if(buffer2==0){area.m2<-data.frame(id=st_drop_geometry(polig.mb0)[,id.column],polygons.m2=as.numeric(st_area(polig.mb0)),buffer1.m2=as.numeric(st_area(polig.mb1)))}
+  if(buffer2>0 & buffer3==0){area.m2<-data.frame(id=st_drop_geometry(polig.mb0)[,id.column],polygons.m2=as.numeric(st_area(polig.mb0)),buffer1.m2=as.numeric(st_area(polig.mb1)),buffer2.m2=as.numeric(st_area(polig.mb2)))}
+  if(buffer3>0){area.m2<-data.frame(id=st_drop_geometry(polig.mb0)[,id.column],polygons.m2=as.numeric(st_area(polig.mb0)),buffer1.m2=as.numeric(st_area(polig.mb1)),buffer2.m2=as.numeric(st_area(polig.mb2)),buffer3.m2=as.numeric(st_area(polig.mb3)))}
+
+
   polig.mb0.gee<-sf_as_ee(polig.mb0)
   if(buffer1 > 0){polig.mb1.gee<-sf_as_ee(polig.mb1)} else {polig.mb1.gee=NULL}
   if(buffer2 > 0){polig.mb2.gee<-sf_as_ee(polig.mb2)} else {polig.mb2.gee=NULL}
@@ -198,15 +236,20 @@ get.mb.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   polig.mb2.gee<<-polig.mb2.gee
   polig.mb3.gee<<-polig.mb3.gee
 
+
+
+
   out.get.mb.ecors<-list(get.mb.ecor.date.time=get.mb.ecor.date.time,
-                         site.gee=site.gee, samples.gee=samples.gee, polygons.gee=polygons.gee, center=center,
-                         projected=projected, custom.crs=custom.crs,
                          collection.mb=collection.mb, legend.mb=legend.mb, palette.mb=palette.mb,
-                         years=years, resolution=resolution,
+                         years=years, resolution=resolution, post.processing="none", object.name="mb",
                          evaluate=evaluate, cumulative.surroundings=cumulative.surroundings,
                          buffer1=buffer1, buffer2=buffer2, buffer3=buffer3,
-                         polig.mb0=polig.mb0, polig.mb1=polig.mb1, polig.mb2=polig.mb2, polig.mb3=polig.mb3)
+                         polig.mb0=polig.mb0, polig.mb1=polig.mb1, polig.mb2=polig.mb2, polig.mb3=polig.mb3, area.m2=area.m2,
+                         site.gee=site.gee, samples.gee=samples.gee, polygons.gee=polygons.gee
+                         )
   #mb e polig.mb saem como <<- (para evitar erro de tempo limite excedido)
+  class(out.get.mb.ecors)<-"mb.ecors"
+
   return(out.get.mb.ecors)
 
 }

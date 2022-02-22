@@ -1,14 +1,14 @@
 #' Plot mb.ecors object
 #'
-#' Plot MapBiomas images processed by focal (morphological reducer) along with site and sample polygons.
+#' Plot MapBiomas images aquired by get.mb.ecors along with site and sample polygons. Optionally pre-processed by focal (morphological reducer
 #'
 #' @param x mb.ecors object (from get.mb.ecors).
 #' @param window.radius radius of moving window (m).
 #' @param zoom initial zoom value.
 #' @param legend choose to show the legend or not.
 #'
-#' @details
-#' Plot to check the effect of "focal" preprocessing on the removal of isolated pixels and eventual removal of real data (Linear features such as gallery forests or water bodies are particularly susceptible to be removed by this technique).
+#'@details
+#' Plot mb.ecors objects for visualization of unprocessed MapBiomas classifications images or to check the effect of "focal" preprocessing on the removal of isolated pixels and eventual removal of real data (Linear features such as gallery forests or water bodies are particularly susceptible to be removed by this technique).
 #' Moving window size indicates area in which values will be replaced by the "mode" value in the area (larger values cause more aggressive removal/simplification).
 #'
 #' @return
@@ -39,47 +39,30 @@
 #'      collection.mb=6, years=c(2000,2010), resolution=30, evaluate="surroundings.site",
 #'      buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
 #'
-#' #Plotting
-#' plot.focal.mb.ecors(x=mb2000_2010,window.radius=80)
+#' #Original images
+#' plot(x=mb2000_2010)
+#'
+#' #Focal preprocessing
+#' plot(x=mb2000_2010,window.radius=80)
 
-
-plot.focal.mb.ecors<-function(x,window.radius,zoom=12,legend=T){
+plot.mb.ecors<-function(x,window.radius=NULL, zoom=12, legend=T){
 
   if(class(x)!="mb.ecors"){stop("Argument x must be a mb.ecors class object.")}
 
   list2env(x,envir=environment())
 
   Map$setCenter(center[1],center[2],zoom)
-
   comando.visuali<-c()
-  comando.visualiA<-c()
-  comando.visualiB<-c()
   for (i in 1:length(years)){
-    par.vis.mb<-list(palette=palette.mb$color,values=palette.mb$lu.class,min=0,max=max(palette.mb$pixel.value))
-
-    mbi<-mb$select(paste0("classification_",years[i]))
-    #ee_print(mbi)
-    mbi.f<-mbi$focalMode(radius=window.radius,
-                         kernelType="circle",
-                         units="meters",
-                         iterations=1)
-
-    prov<-Map$addLayer(mbi,par.vis.mb,paste0(years[i]))
+    par.vis.mb<-list(palette=palette.mb$color,values=palette.mb$lu.class,bands=paste0("classification_",years[i]),min=0,max=max(palette.mb$pixel.value))
+    prov<-Map$addLayer(mb,par.vis.mb,paste0(years[i]))
     assign(paste0("map.mb",i),prov,envir=.GlobalEnv)
-
-    prov.f<-Map$addLayer(mbi.f,par.vis.mb,paste0(years[i],"_focal_",window.radius,"m"))
-    assign(paste0("map.mb.f",i),prov.f,envir=.GlobalEnv)
-
-    if(length(comando.visualiA)==0){comando.visualiA<-c("map.mb1")} else {
-      comando.visualiA<-paste0(comando.visualiA,"+map.mb",i)}
-
-    if(length(comando.visualiB)==0){comando.visualiB<-c("map.mb.f1")} else {
-      comando.visualiB<-paste0(comando.visualiB,"+map.mb.f",i)}
+    if(length(comando.visuali)==0){comando.visuali<-c("map.mb1")} else {
+      comando.visuali<-paste0(comando.visuali,"+map.mb",i)}
   }
-
   if(legend==T){
     leg.mb<<-Map$addLegend(par.vis.mb,name="Legend",color_mapping="character",position="topright")
-    comando.visuali<-paste0(comando.visualiA,"|",comando.visualiB,"+leg.mb")
+    comando.visuali<-paste0(comando.visuali,"+leg.mb")
   }
   if(is.null(site.gee)==F){
     map.site<<-Map$addLayer(site.gee,name="site")
@@ -110,4 +93,3 @@ plot.focal.mb.ecors<-function(x,window.radius,zoom=12,legend=T){
 
   return(eval(parse(text=comando.visuali),envir=.GlobalEnv))
 }
-

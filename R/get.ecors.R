@@ -29,8 +29,10 @@
 #' @param seasons month allocation (numerical form) in up to four seasons. Use the list structure list(s1=c(), s2=c(), s3=c(), s4=c()) keeping the items you don't want to use empty. More information in the exemples section.
 #' @param sort.by should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.
 #' @param composite method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL (disable composition).
+#' @param online.storage select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.
 #'
 #' @details
+#'
 #'
 #'
 #' @return Object of the "ecors" class with metadata and pre-processed data to be used in the stats.ecors, plot.ecors or download.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
@@ -75,12 +77,15 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
                     collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
                     pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
                     cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-                    seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), sort.by="month", composite=NULL)
+                    seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), sort.by="month", composite=NULL,
+                    online.storage="drive")
 
 
 {
 
-  ee_Initialize(user = 'ndef', drive = TRUE)
+  if(is.null(online.storage)){ee_Initialize(user = 'ndef', drive = F, gcs = F)}
+  if(online.storage=="gcs"){ee_Initialize(user = 'ndef', drive = F, gcs = T)}
+  if(online.storage=="drive"){ee_Initialize(user = 'ndef', drive = T, gcs = F)}
 
   #############################################
   ##### CONFIGURAÇÕES DAS COLEÇÕES ############
@@ -403,8 +408,9 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   ### Organizando polígonos (site, circles, plots, samples) #######
   #################################################################
 
+  samples<-NULL
+
   #points->circles
-  if(is.null(points)){points<-c()}
   if(sum(class(points)=="sf")) {
 
     if(projected==F & is.null(custom.crs)){
@@ -432,7 +438,6 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   } else {cat("\n No valid file with points \n")}
 
   #plots
-  if(is.null(plots)){plots<-c()}
   if(sum(class(plots)=="sf")){
 
     names(plots)[names(plots)==attr(plots,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
