@@ -23,10 +23,10 @@
 #' @examples
 #' #get a ecors class object
 #' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #'
-#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
+#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval=c("SR_B3","SR_B4"), bands.vis=F, indices=c("NDVI"), resolution=30,
@@ -58,6 +58,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   if(class(x)!="ecors"){stop("Argument x must be a ecors class object.")}
 
   list2env(x,envir=environment())
+
+  if(is.null(x$samples.gee)){stop("Argument x (ecors object) do not contain samples.")}
 
   if(substr(spreadsheet.folder,nchar(spreadsheet.folder),nchar(spreadsheet.folder))=="/"){spreadsheet.folder<-substr(spreadsheet.folder,1,nchar(spreadsheet.folder)-1)}
 
@@ -176,9 +178,9 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
       tab.npixelsOK.samples<-ee_extract(x=pixels1.masca.full.range,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na coleção (pixels1 com múltiplas máscaras)
     }
     if(stats$count==F){
-    cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
-    tab.npixels.samples<-ee_extract(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na imagem de pixels1
-    tab.npixelsOK.samples<-ee_extract(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na coleção (pixels1 com múltiplas máscaras)
+      cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      tab.npixels.samples<-ee_extract(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na imagem de pixels1
+      tab.npixelsOK.samples<-ee_extract(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na coleção (pixels1 com múltiplas máscaras)
     }
   }
 
@@ -216,11 +218,6 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   }
 
 
-  ##########################################
-  ###### Organizando qualidade samples #####
-  ##########################################
-  tab.stat.samples<-list()
-
   #pixelsOK
   prov.total<-matrix(rep(tab.npixels.samples[,ncol(tab.npixels.samples)],times=n.imagens.est),ncol=n.imagens.est)
   prov.OK<-as.matrix(tab.npixelsOK.samples[,c((ncol(tab.npixelsOK.samples)-n.imagens.est+1):ncol(tab.npixelsOK.samples))])
@@ -232,14 +229,16 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   tab.OK.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
 
   #prop count
-  names(tab.count.samples)<-gsub(pattern="npixelsOK", replacement="count", x=names(tab.count.samples))#ajuste no nome (para diferenciar do pixelsOK)
-  prov.count<-as.matrix(tab.count.samples[,c((ncol(tab.count.samples)-n.imagens.est+1):ncol(tab.count.samples))])
-  tab.prop.samples<-tab.count.samples #aproveitando estrutura inicial para preenchimento
-  names(tab.prop.samples)<-gsub(pattern="count",replacement="prop",x=names(tab.count.samples))
-  tab.prop.samples[,c((ncol(tab.count.samples)-n.imagens.est+1):ncol(tab.count.samples))]<-prov.count/prov.OK
-  tab.count.prop.samples<-merge(tab.count.samples,tab.prop.samples,suffixes=c(),sort=F)
-  tab.count.prop.samples<-select(tab.count.prop.samples,"id","type",sort(names(tab.count.prop.samples)[!names(tab.count.prop.samples)%in%c("id","type")]))
-  tab.count.prop.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
+  if(stats$count==T){
+    names(tab.count.samples)<-gsub(pattern="npixelsOK", replacement="count", x=names(tab.count.samples))#ajuste no nome (para diferenciar do pixelsOK)
+    prov.count<-as.matrix(tab.count.samples[,c((ncol(tab.count.samples)-n.imagens.est+1):ncol(tab.count.samples))])
+    tab.prop.samples<-tab.count.samples #aproveitando estrutura inicial para preenchimento
+    names(tab.prop.samples)<-gsub(pattern="count",replacement="prop",x=names(tab.count.samples))
+    tab.prop.samples[,c((ncol(tab.count.samples)-n.imagens.est+1):ncol(tab.count.samples))]<-prov.count/prov.OK
+    tab.count.prop.samples<-merge(tab.count.samples,tab.prop.samples,suffixes=c(),sort=F)
+    tab.count.prop.samples<-select(tab.count.prop.samples,"id","type",sort(names(tab.count.prop.samples)[!names(tab.count.prop.samples)%in%c("id","type")]))
+    tab.count.prop.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
+  }
 
 
   #substituindo nomes de colunas pelos códigos repeticao.season.imagem
@@ -254,6 +253,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   }
 
   cat("\n\n")
+
+  tab.stat.samples<-list()
 
   names(tab.OK.samples)<-f.codif.colunas(tab.OK.samples)
   if(by.image.save==T | summary.save==T){
@@ -270,8 +271,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   if(is.null(composite)==F){
     if(sort.by=="season"){list.images.stat<-unique(images.table$rep.season)}
     if(sort.by=="month"){list.images.stat<-unique(images.table$rep.month)}
-    } else {
-      list.images.stat<-images.table$images}
+  } else {
+    list.images.stat<-images.table$images}
 
   #função de remoção de samples com poucos pixels OK
   f.remove.samples<-function(tab.ori){
@@ -509,6 +510,7 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
       write.csv(tab.stat.samples$summary$count,file=file.path(spreadsheet.folder,"summary.count.samples.csv"))
       cat(paste("_____\n File with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.count.samples.csv"), "\n_____"))}
   }
+  cat("\n")
 
 
   metadata<-list(get.ecor.date.time=as.character(get.ecor.date.time), collection=collection, start=start, end=end,
@@ -524,4 +526,3 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
   return(tab.stat.samples)
 }
-

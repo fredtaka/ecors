@@ -22,14 +22,21 @@ Google Earth Engine main catalog
 \item \link{download.ecors}	Download images
 }
 \cr
-MapBiomas catalog
+Land Use data
 \itemize{
-\item \link{get.mb.ecors}	Get MapBiomas data to ecors
-\item \link{dist.mb.ecors}	Distance to Land Use class
-\item \link{count.mb.ecors}	Count pixels of each Land Use class
-\item \link{plot.focal.mb.ecors}	Plot mb.ecors object
-\item \link{plot.mb.ecors}	Plot mb.ecors object
-\item \link{download.mb.ecors}	Download MapBiomas images
+\item \link{get.lu.ecors}	Get Land Use data to ecors
+\item \link{focal.lu.ecors} Applies a morphological reducer filter (focal) on Land Use images
+\item \link{convert.lu.ecors} Re-assign land use classes by converting pixel values
+\item \link{quantify.lu.ecors}	Quantify the pixels of each Land Use class
+\item \link{dist.lu.ecors}	Distance to Land Use class
+\item \link{plot.lu.ecors}	Plot mb.ecors object
+\item \link{download.lu.ecors}	Download Land Use images
+}
+
+\cr
+Misc
+\itemize{
+\item \link{wakeup.gee} If you receive an error message regarding the Google Earth Engine server being disconnected due to inactivity, use this command to re-establish the connection
 }
 }
 \seealso{

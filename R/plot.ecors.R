@@ -36,23 +36,29 @@
 #' @examples
 #' #get a ecors class object
 #' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
-#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #'
-#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
+#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
-#'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
+#'     collection="LANDSAT/LC08/C01/T1_TOA", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.vis=T, indices=c("NDVI"), resolution=30,
-#'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
+#'     pOK=0.3, c.prob=NULL, c.dist=NULL, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
 #'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
 #'
-#' #plotting
-#' plot.ecors(x=d2020, ecors.type="mask", visualization="vis.bands", defaults=T,
-#'            legend=T, bands=NULL, pixel.min=NULL, pixel.max=NULL, image.gamma=NULL)
+#' #Plotting
+#' #defaults
+#' plot(x=d2020, ecors.type="mask", visualization="vis.bands")
 #'
-#' plot.ecors(x=d2020, ecors.type="mask", visualization="custom", defaults=F,
+#' plot(x=d2020, ecors.type="filtered+mask", visualization="vis.bands")
+#'
+#' #custom
+#' plot(x=d2020, ecors.type="mask", visualization="custom", defaults=F,
 #'            legend=T, bands="NDVI", pixel.min=-1, pixel.max=1, image.gamma=NULL)
 #'
+#' #panchromatic sharpening
+#' plot(x=d2020, ecors.type="filtered", visualization="pan.sharpening")
+
 plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults=T, legend=F, bands=NULL,
                      pixel.min=NULL, pixel.max=NULL, image.gamma=NULL){
 
@@ -142,12 +148,12 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
         imagem$unitScale(pixel.min,pixel.max)})
     } else {
       #baseado no: https://gis.stackexchange.com/questions/313394/normalization-in-google-earth-engine
-      listabandas<-ee$List(imagem$bandNames())
+      listabandas<-ee$List(colle.plot$first()$bandNames())
       colle.plot<-colle.plot$map(function(imagem){
         imgMinMax<-imagem$reduceRegion(
           reducer=ee$Reducer$minMax(),
           geometry=poligono,
-          scale=escala,
+          scale=resolution,
           maxPixels=10e9)
         unitScale<-ee$ImageCollection$fromImages(imagem$bandNames()$map(ee_utils_pyfunc(function(nomebanda){
           nomebanda<-ee$String(nomebanda)

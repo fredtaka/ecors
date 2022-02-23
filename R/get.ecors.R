@@ -55,10 +55,10 @@
 #' @examples
 #' FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
-#' test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+#' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
-#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles, buffer.points=500, buffer.plots=500,
+#' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
@@ -72,7 +72,7 @@
 #' @import dplyr
 #' @export
 
-get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.plots=0, eval.area="site",
+get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.points=1, buffer.plots=0, eval.area="site",
                     projected=FALSE, custom.crs=NULL,
                     collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
                     pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
@@ -474,13 +474,17 @@ get.ecors<-function(site, points, plots, id.column=1, buffer.points=1, buffer.pl
   if(sum(class(points)=="sf",class(plots)=="sf")==2) {
     samples<-rbind(circles,plots.buf)
   }
-  area.m2<-as.numeric(st_area(samples)) #para metadata
+  if(is.null(samples)==F){
+    area.m2<-as.numeric(st_area(samples)) #para metadata
+  }else{area.m2<-NULL}
 
   if(eval.area=="site"){
-    if(is.null(site) || "sf" %in% class(site)==F){stop(print("When eval.area=\"site\" you need to set a sf object to site"))}
+    if(is.null(site) || "sf" %in% class(site)==F){stop(print("When eval.area=\"site\" you need to set a sf object to site argument."))}
     eval.area.gee<-sf_as_ee(site)
   }
-  if(eval.area=="samples"){eval.area.gee<-sf_as_ee(samples)}
+  if(eval.area=="samples"){
+    if(is.null(samples) || "sf" %in% class(samples)==F){stop(print("When eval.area=\"samples\" you need to set a sf object to samples argument."))}
+    eval.area.gee<-sf_as_ee(samples)}
 
   if(is.null(site)){site.gee<-NULL} else {site.gee<-sf_as_ee(site)}
   if(is.null(samples)){samples.gee<-NULL} else {samples.gee<-sf_as_ee(samples)}
