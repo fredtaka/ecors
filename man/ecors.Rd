@@ -5,13 +5,8 @@
 \alias{ecors}
 \title{ecors: Remote Sensing data acquisition and processing for ecology with Google Earth Engine}
 \description{
-It simplifies the acquisition of data in Google Earth Engine and
-performs several steps of organization and processing typical of ecological studies,
-allowing the visualization of maps, data download and production of simple statistics
-commonly used in ecological studies. It aims to simplify the use of commands from the
-rgee package and the Google Earth Engine platform with a style of functions more
-familiar to R users who usually perform statistical analysis for ecological studies.
-Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/).
+Package to simplify the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing pre-processing, visualization, data download and calculation of simple statistics commonly used in ecological studies. It aims to simplify the use of rgee and Google Earth Engine commands, performing internally several data manipulation steps. The function syntax follows a familiar style for R users who routinely perform statistical analysis for ecological studies. Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/).
+\cr
 }
 \details{
 Google Earth Engine main catalog

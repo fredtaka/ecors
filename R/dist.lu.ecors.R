@@ -34,13 +34,14 @@
 #' # Get lu.ecors object (buffer size will not be considered in dist.lu.ecors)
 #' lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
-#'      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.samples",
-#'      buffer1=1, buffer2=NULL, buffer3=NULL, cumulative.surroundings=F)
+#'      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="distance.samples",
+#'      buffer1=NULL, buffer2=NULL, buffer3=NULL, cumulative.surroundings=F)
+#'      #if you set evaluate to "surroundings.samples" the result will be the same, but will spend extra time to generate bufferes (do not used here).
 #'
 #' dist_to_3<-dist.lu.ecors(x=lu2000_2010, class.value=3, stat.dist="mean",
 #'                            max.dist=5000, focal=T, window.radius=90)
 
-dist.lu.ecors<-function(x, class.value, stat.dist, max.dist, focal, window.radius){
+dist.lu.ecors<-function(x, class.value, stat.dist, max.dist, focal=F, window.radius=NULL){
 
   if(class(x)!="lu.ecors"){stop("Argument x must be a lu.ecors class object.")}
 
@@ -123,6 +124,7 @@ dist.lu.ecors<-function(x, class.value, stat.dist, max.dist, focal, window.radiu
 
   if(focal==T){cat(paste0("Focal: image rendered by moving window with mode value.\nMoving window radius (m): ", window.radius,
                           "\nUse plot.focal.lu.ecors to check if focal processing made sense: adjust moving window radius if needed.\n"))}
+
   cat(paste0("\nMaximum evaluated distance (m): ",max.dist, "\nPixels size (m): ", x$resolution,
              "\nObs.: Interior of polygons was not considered.
       \nEvaluated Land Use class: ", x$legend.lu$lu.class[x$legend.lu$pixel.value==class.value], " (pixel value: ",class.value,")\n"))

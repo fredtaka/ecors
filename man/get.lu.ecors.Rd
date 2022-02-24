@@ -44,7 +44,7 @@ get.lu.ecors(
 
 \item{resolution}{select pixel size (m) for analysis and download.}
 
-\item{evaluate}{indicate whether analysis should be performend on the "surroundings.samples", "surroundings.site" or "inside.polygons"}
+\item{evaluate}{indicate whether analysis should be performend on the "surroundings.samples", "surroundings.site" or "inside.polygons". Option "distance.samples" should be used when you want to use only the dist.lu.ecors function where buffers are not used (other options of the evaluate argument do not preclude the usage of dist.lu.ecors).}
 
 \item{buffer1}{nearest buffer radius (m).}
 

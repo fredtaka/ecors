@@ -8,7 +8,6 @@
 #' @param id.column number of id.column in your points and/or plots objects (need to be the same for both).
 #' @param buffer.points radius (m) of buffer of points. Need to be > 0.
 #' @param buffer.plots radius (m) of buffer of plots.
-#' @param eval.area choose evaluated area for quality control: site or samples.
 #' @param projected are the provided sf objects projected? (scale = m)
 #' @param custom.crs choose a crs code to project sf objects prior to buffer processing.
 #' @param pOK minimum proportion of pixels aproved in quality control on the evaluated area to use a image.
@@ -20,6 +19,7 @@
 #' @param bands.vis include bands for visualization?
 #' @param indices select indices to be produced. Available options are "NDVI", "EVI", "NBR".
 #' @param resolution select pixel size (m) for (most of) quality control procedures. This value will be passed to stats.ecors and download.ecors.
+#' @param eval.area choose evaluated area for quality control: site or samples.
 #' @param clouds.sentinel method for cloud detection in Sentinel-2 MSI. Options are the collection "default" (using built in Quality Analysis of these collections; several false negative pixels; not detect cloud shadows in TOA images), "CDI" (more time consuming) or NULL.
 #' @param c.prob set the cloud probability threshold value to exclude pixels in Sentinel-2 MSI imagens. It could remove additional pixels with clouds.sentinel="default" (not compatible with "CDI" method).
 #' @param cirrus.threshold set threshold value for method CDI (see Frantz et al. 2018 for details).
@@ -32,9 +32,39 @@
 #' @param online.storage select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.
 #'
 #' @details
+#' Currently ecors supports the following remote sensing data collections:
 #'
+#' \cr
+#' Landsat 8
+#' \itemize{
+#' \item "LANDSAT/LC08/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2)
+#' \item "LANDSAT/LC08/C01/T1_SR" [Collection 1 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR)
+#' \item "LANDSAT/LC08/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_TOA)
+#' \item "LANDSAT/LC08/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1)
+#' }
 #'
+#' \cr
+#' Landsat 7
+#' \itemize{
+#' \item "LANDSAT/LE07/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2)
+#' \item "LANDSAT/LE07/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA)
+#' \item "LANDSAT/LE07/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1)
+#' }
 #'
+#' \cr
+#' Sentinel-2 MSI (Multispectral Instrument)
+#' \itemize{
+#' \item "COPERNICUS/S2_SR" [Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR)
+#' \item "COPERNICUS/S2" [Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2)
+#' }
+#'
+#' \cr
+#' Global Precipitation Measurement (GPM)
+#' \itemize{
+#' \item "NASA/GPM_L3/IMERG_V06" [Global Precipitation Measurement (GPM) v6 - every three hours](https://developers.google.com/earth-engine/datasets/catalog/NASA_GPM_L3_IMERG_V06)
+#' \item "NASA/GPM_L3/IMERG_MONTHLY_V06" [Monthly Global Precipitation Measurement (GPM) v6](https://developers.google.com/earth-engine/datasets/catalog/NASA_GPM_L3_IMERG_MONTHLY_V06)
+#' }
+
 #' @return Object of the "ecors" class with metadata and pre-processed data to be used in the stats.ecors, plot.ecors or download.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
 #' \itemize{
 #' \item colle (all images available in the period),
@@ -72,10 +102,10 @@
 #' @import dplyr
 #' @export
 
-get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.points=1, buffer.plots=0, eval.area="site",
+get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.points=1, buffer.plots=0,
                     projected=FALSE, custom.crs=NULL,
                     collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
-                    pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
+                    eval.area="site", pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
                     cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
                     seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), sort.by="month", composite=NULL,
                     online.storage="drive")
@@ -952,7 +982,6 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
 
   return(out.get.ecors)
 }
-
 
 
 

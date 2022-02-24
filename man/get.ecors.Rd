@@ -11,7 +11,6 @@ get.ecors(
   id.column = 1,
   buffer.points = 1,
   buffer.plots = 0,
-  eval.area = "site",
   projected = FALSE,
   custom.crs = NULL,
   collection,
@@ -21,6 +20,7 @@ get.ecors(
   bands.vis = T,
   indices = c("NDVI", "EVI", "NBR"),
   resolution,
+  eval.area = "site",
   pOK = 0.8,
   c.dist,
   clouds.sentinel = NULL,
@@ -48,8 +48,6 @@ get.ecors(
 
 \item{buffer.plots}{radius (m) of buffer of plots.}
 
-\item{eval.area}{choose evaluated area for quality control: site or samples.}
-
 \item{projected}{are the provided sf objects projected? (scale = m)}
 
 \item{custom.crs}{choose a crs code to project sf objects prior to buffer processing.}
@@ -67,6 +65,8 @@ get.ecors(
 \item{indices}{select indices to be produced. Available options are "NDVI", "EVI", "NBR".}
 
 \item{resolution}{select pixel size (m) for (most of) quality control procedures. This value will be passed to stats.ecors and download.ecors.}
+
+\item{eval.area}{choose evaluated area for quality control: site or samples.}
 
 \item{pOK}{minimum proportion of pixels aproved in quality control on the evaluated area to use a image.}
 
@@ -104,7 +104,38 @@ Object of the "ecors" class with metadata and pre-processed data to be used in t
 Get data from Google Earth Engine for your study site and integrate with study polygons and sampling periods.
 }
 \details{
+Currently ecors supports the following remote sensing data collections:
 
+\cr
+Landsat 8
+\itemize{
+\item "LANDSAT/LC08/C02/T1_L2" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2}{Collection 2 - Surface Reflectance}
+\item "LANDSAT/LC08/C01/T1_SR" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR}{Collection 1 - Surface Reflectance}
+\item "LANDSAT/LC08/C01/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_TOA}{Collection 1 - Top of Atmosphere Reflectance}
+\item "LANDSAT/LC08/C01/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1}{Collection 1 - Raw Images}
+}
+
+\cr
+Landsat 7
+\itemize{
+\item "LANDSAT/LE07/C02/T1_L2" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2}{Collection 2 - Surface Reflectance}
+\item "LANDSAT/LE07/C01/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA}{Collection 1 - Top of Atmosphere Reflectance}
+\item "LANDSAT/LE07/C01/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1}{Collection 1 - Raw Images}
+}
+
+\cr
+Sentinel-2 MSI (Multispectral Instrument)
+\itemize{
+\item "COPERNICUS/S2_SR" \href{https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR}{Surface Reflectance}
+\item "COPERNICUS/S2" \href{https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2}{Top of Atmosphere Reflectance}
+}
+
+\cr
+Global Precipitation Measurement (GPM)
+\itemize{
+\item "NASA/GPM_L3/IMERG_V06" \href{https://developers.google.com/earth-engine/datasets/catalog/NASA_GPM_L3_IMERG_V06}{Global Precipitation Measurement (GPM) v6 - every three hours}
+\item "NASA/GPM_L3/IMERG_MONTHLY_V06" \href{https://developers.google.com/earth-engine/datasets/catalog/NASA_GPM_L3_IMERG_MONTHLY_V06}{Monthly Global Precipitation Measurement (GPM) v6}
+}
 }
 \examples{
 FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))

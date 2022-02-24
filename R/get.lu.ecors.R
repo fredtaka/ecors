@@ -12,7 +12,7 @@
 #' @param collection.lu Land Use collection. Available options are currently "mapbiomas5" and "mapbiomas6" (MapBiomas collections 5 and 6). Select the most recent (higher number) if there is no reason not to.
 #' @param years numerical vector.
 #' @param resolution select pixel size (m) for analysis and download.
-#' @param evaluate indicate whether analysis should be performend on the "surroundings.samples", "surroundings.site" or "inside.polygons"
+#' @param evaluate indicate whether analysis should be performend on the "surroundings.samples", "surroundings.site" or "inside.polygons". Option "distance.samples" should be used when you want to use only the dist.lu.ecors function where buffers are not used (other options of the evaluate argument do not preclude the usage of dist.lu.ecors).
 #' @param buffer1 nearest buffer radius (m).
 #' @param buffer2 middle buffer radius (m).
 #' @param buffer3 farthest buffer radius (m).
@@ -63,16 +63,28 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
 
   if(collection.lu%in%c("mapbiomas5","mapbiomas6")==F){stop("Currently, only \"mapbiomas5\",\"mapbiomas6\" (MapBiomas collections 5 and 6) are supported (use the latest if you do not reasons to do otherwise).")}
 
-  if(evaluate%in%c("surroundings.samples", "surroundings.site", "inside.polygons")==F){
-    stop("Argument evaluate must be surroundings.samples, surroundings.site or inside.polygons.")}
+  if(evaluate%in%c("surroundings.samples", "surroundings.site", "inside.polygons", "distance.samples")==F){
+    stop("Argument evaluate must be surroundings.samples, surroundings.site, inside.polygons or distance.samples.")}
 
   #zero or NULL will disable a buffer
   if(is.null(buffer1)){buffer1<-0}
   if(is.null(buffer2)){buffer2<-0}
   if(is.null(buffer3)){buffer3<-0}
 
+  if(buffer1==0 & (buffer2>0 | buffer3>0)){
+    stop("If buffer1 = 0, buffer2 and buffer3 should be 0.")
+  }
+
+  if(buffer2==0 & buffer3>0){
+    stop("If buffer2 = 0, buffer3 should be 0.")
+  }
+
   if(evaluate%in%c("surroundings.samples", "surroundings.site") & !(buffer1>0 | buffer2>0 | buffer3>0 )){
-    stop(print("Need to specify buffer values to use evaluate as surroundings.samples or surroundings.site"))
+    stop(print("Need to specify buffer values when evaluate is set to \"surroundings.samples\" or \"surroundings.site\""))
+  }
+
+  if(evaluate=="distance.samples" & (buffer1>0 | buffer2>0 | buffer3>0 )){
+    stop(print("Argument evaluate = \"distance.samples\" do not supports buffers."))
   }
 
   if(projected==F & is.null(custom.crs) & (buffer1>0 | buffer2>0 | buffer3>0 )){
@@ -210,7 +222,7 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     if(buffer1 > 0 | buffer2 > 0 | buffer2 > 0){
       cat(paste("\nEvaluating the area of the interior of polygons +  buffers.\n")) } else {
         cat(paste("\nEvaluating the area of the interior of polygons.\n")) }
-    if(buffer1 > 0){polig.lu1<-st_buffer(polygons, buffer1)} else {polig.lu1<-polygons}
+    if(buffer1 > 0){polig.lu1<-st_buffer(polygons, buffer1)} else {polig.lu1<-NULL}
     if(buffer2 > 0){polig.lu2<-st_buffer(polygons, buffer2)} else {polig.lu2<-NULL}
     if(buffer3 > 0){polig.lu3<-st_buffer(polygons, buffer3)} else {polig.lu3<-NULL}
 
@@ -220,8 +232,17 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     })
   }
 
+  if(evaluate=="distance.samples"){
+    polig.lu0<-samples
+    polig.lu1<-NULL
+    polig.lu2<-NULL
+    polig.lu3<-NULL
+  }
+
+
   #areas
-  if(buffer2==0){area.m2<-data.frame(id=st_drop_geometry(polig.lu0)[,id.column],polygons.m2=as.numeric(st_area(polig.lu0)),buffer1.m2=as.numeric(st_area(polig.lu1)))}
+  if(buffer1==0){area.m2<-data.frame(id=st_drop_geometry(polig.lu0)[,id.column],polygons.m2=as.numeric(st_area(polig.lu0)))}
+  if(buffer2==0 & buffer1>0){area.m2<-data.frame(id=st_drop_geometry(polig.lu0)[,id.column],polygons.m2=as.numeric(st_area(polig.lu0)),buffer1.m2=as.numeric(st_area(polig.lu1)))}
   if(buffer2>0 & buffer3==0){area.m2<-data.frame(id=st_drop_geometry(polig.lu0)[,id.column],polygons.m2=as.numeric(st_area(polig.lu0)),buffer1.m2=as.numeric(st_area(polig.lu1)),buffer2.m2=as.numeric(st_area(polig.lu2)))}
   if(buffer3>0){area.m2<-data.frame(id=st_drop_geometry(polig.lu0)[,id.column],polygons.m2=as.numeric(st_area(polig.lu0)),buffer1.m2=as.numeric(st_area(polig.lu1)),buffer2.m2=as.numeric(st_area(polig.lu2)),buffer3.m2=as.numeric(st_area(polig.lu3)))}
 
@@ -235,8 +256,6 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   polig.lu1.gee<<-polig.lu1.gee
   polig.lu2.gee<<-polig.lu2.gee
   polig.lu3.gee<<-polig.lu3.gee
-
-
 
 
   out.get.lu.ecors<-list(get.lu.ecor.date.time=get.lu.ecor.date.time,

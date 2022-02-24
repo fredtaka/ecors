@@ -37,6 +37,8 @@ quantify.lu.ecors<-function(x, save.format="ods", save.metadata=T, spreadsheet.f
 
   if(class(x)!="lu.ecors"){stop("Argument x must be a lu.ecors class object.")}
 
+  if(x$evaluate=="distance.samples"){stop("lu.ecors object assigned to x was generated with option evaluate=\"distance.samples\". This option is incompatible with quntify.lu.ecors.")}
+
   lu.prov<-eval(parse(text=x$object.name))
 
   if(is.null(spreadsheet.folder)==F){

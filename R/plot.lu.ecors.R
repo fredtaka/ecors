@@ -64,6 +64,8 @@ plot.lu.ecors<-function(x,comp=NULL,zoom=12,legend=T){
   if(x$evaluate=="surroundings.site"){center.poly.transf<-x$site.gee$geometry(1)$transform()}
   if(x$evaluate=="surroundings.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform()}
   if(x$evaluate=="inside.polygons"){center.poly.transf<-x$polygons.gee$geometry(1)$transform()}
+  if(x$evaluate=="distance.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform()}
+
 
   center<-center.poly.transf$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
 
