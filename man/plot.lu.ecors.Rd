@@ -38,7 +38,7 @@ test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors")
 lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
-     buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
+     buffer1=5000, buffer2=10000, buffer3=15000, cumulative.surroundings=F)
 
 # Plotting
 plot(x=lu2000_2010)

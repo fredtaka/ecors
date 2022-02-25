@@ -23,13 +23,7 @@
 #' Sites, plots and points represent places where you want to know the effect of land use carried out in the surroundings (buffer zones). If you want to define the area within which the land use will be evaluated, use the polygons option. For site, points and parcels it is necessary to inform at least one buffer size. \cr
 #' Regardless of where you want to perform the analyses, all these geometries can be informed simultaneously so that these polygons can be used in the map visualization.
 #'
-#' @return Object of the "lu.ecors" class with metadata and pre-processed data to be used in the count.lu.ecors, dist.lu.ecors, plot.focal.lu.ecors, plot.lu.ecors or download.lu.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
-#' \itemize{
-#' \item lu (Land Use image: years stored as bands),
-#' \item polig.lu0.gee (reference polygons),
-#' \item polig.lu1.gee (buffer1 polygons),
-#' \item polig.lu2.gee (buffer2 polygons),
-#' \item polig.lu3.gee (buffer3 polygons).}
+#' @return Object of the "lu.ecors" class with metadata and pre-processed data to be used in the count.lu.ecors, dist.lu.ecors, plot.focal.lu.ecors, plot.lu.ecors or download.lu.ecors functions. Aditional Google Earth Engine container object lu (Land Use image: years stored as bands) is exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit). \cr
 #'
 #' @import rgee
 #' @import rgeeExtra
@@ -252,10 +246,10 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   if(buffer2 > 0){polig.lu2.gee<-sf_as_ee(polig.lu2)} else {polig.lu2.gee=NULL}
   if(buffer3 > 0){polig.lu3.gee<-sf_as_ee(polig.lu3)} else {polig.lu3.gee=NULL}
 
-  polig.lu0.gee<<-polig.lu0.gee
-  polig.lu1.gee<<-polig.lu1.gee
-  polig.lu2.gee<<-polig.lu2.gee
-  polig.lu3.gee<<-polig.lu3.gee
+  # polig.lu0.gee<<-polig.lu0.gee
+  # polig.lu1.gee<<-polig.lu1.gee
+  # polig.lu2.gee<<-polig.lu2.gee
+  # polig.lu3.gee<<-polig.lu3.gee
 
 
   out.get.lu.ecors<-list(get.lu.ecor.date.time=get.lu.ecor.date.time,
@@ -264,7 +258,8 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
                          evaluate=evaluate, cumulative.surroundings=cumulative.surroundings,
                          buffer1=buffer1, buffer2=buffer2, buffer3=buffer3,
                          polig.lu0=polig.lu0, polig.lu1=polig.lu1, polig.lu2=polig.lu2, polig.lu3=polig.lu3, area.m2=area.m2,
-                         site.gee=site.gee, samples.gee=samples.gee, polygons.gee=polygons.gee
+                         site.gee=site.gee, samples.gee=samples.gee, polygons.gee=polygons.gee,
+                         polig.lu0.gee=polig.lu0.gee, polig.lu1.gee=polig.lu1.gee, polig.lu2.gee=polig.lu2.gee, polig.lu3.gee=polig.lu3.gee
                          )
   #lu e polig.lu saem como <<- (para evitar erro de tempo limite excedido)
   class(out.get.lu.ecors)<-"lu.ecors"

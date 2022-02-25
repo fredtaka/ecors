@@ -149,18 +149,18 @@ quantify.lu.ecors<-function(x, save.format="ods", save.metadata=T, spreadsheet.f
   if(length(x$years)>1){#rgee não aceita ee$List de tamanho menor que 2 | Aqui redu.lu.polygons é usado em dois significados: objeto e entrada (variável) de função
     years.gee<-paste0("classification_",x$years)
     years.gee<-years.gee%>%ee$List()
-    polig<-polig.lu1.gee
+    polig<-x$polig.lu1.gee
     redu.lu.polygons<-years.gee$map(ee_utils_pyfunc(fun.lu))
     if(x$buffer1 > 0) {results.lu[[paste0("buffer_",x$buffer1)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)} else {
       results.lu[["geom_provided"]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)}
 
     if(x$buffer2 > 0){
-      polig<-polig.lu2.gee
+      polig<-x$polig.lu2.gee
       redu.lu.polygons<-years.gee$map(ee_utils_pyfunc(fun.lu))
       results.lu[[paste0("buffer_",x$buffer2)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)
     }
     if(x$buffer3 > 0){
-      polig<-polig.lu3.gee
+      polig<-x$polig.lu3.gee
       redu.lu.polygons<-years.gee$map(ee_utils_pyfunc(fun.lu))
       results.lu[[paste0("buffer_",x$buffer3)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)
     }
@@ -168,16 +168,16 @@ quantify.lu.ecors<-function(x, save.format="ods", save.metadata=T, spreadsheet.f
   }
 
   if(length(x$years)==1){#rgee não aceita ee$List de tamanho menor que 2
-    redu.lu.polygons<-fun.lu.1ano(polig.lu1.gee)
+    redu.lu.polygons<-fun.lu.1ano(x$polig.lu1.gee)
     if(x$buffer1 > 0) {results.lu[[paste0("buffer_",x$buffer1)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)} else {
       results.lu[["geom_provided"]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)}
 
     if(x$buffer2 > 0){
-      redu.lu.polygons<-fun.lu.1ano(polig.lu2.gee)
+      redu.lu.polygons<-fun.lu.1ano(x$polig.lu2.gee)
       results.lu[[paste0("buffer_",x$buffer2)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)
     }
     if(x$buffer3 > 0){
-      redu.lu.polygons<-fun.lu.1ano(polig.lu3.gee)
+      redu.lu.polygons<-fun.lu.1ano(x$polig.lu3.gee)
       results.lu[[paste0("buffer_",x$buffer3)]]<-preenchendo.tabela.lu(redu.lu.polygons=redu.lu.polygons)
     }
   }
@@ -206,21 +206,21 @@ quantify.lu.ecors<-function(x, save.format="ods", save.metadata=T, spreadsheet.f
           }#apesar dos nomes, funciona também com polígono sem buffer
         }
       }
-      cat(paste0("\n File \"results_quantify_lu.ods\" saved:",file.path(spreadsheet.folder), " at ",format(Sys.time(),"%H:%M", "\n")))
+      cat(paste0("\n File \"results_quantify_lu.ods\" saved:",file.path(spreadsheet.folder), " at ",format(Sys.time(),"%H:%M"), "\n"))
     }
 
     if("RData"%in%save.format){
       if(file.exists(file.path(spreadsheet.folder,"results_quantify_lu.RData"))==T){
         stop("File results_quantify_lu.RData already exists in the selected directory:  (",file.path(spreadsheet.folder),"). \nChange the name or location of that file before proceeding.\n")}
       save(results.lu,file=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.RData"))
-      cat(paste0("\n File \"results_quantify_lu.RData\" saved:",file.path(spreadsheet.folder), "\n at ",format(Sys.time(),"%H:%M", "\n")))
+      cat(paste0("\n File \"results_quantify_lu.RData\" saved:",file.path(spreadsheet.folder), "\n at ",format(Sys.time(),"%H:%M"), "\n"))
     }
 
   }
   if(save.metadata==T){
     sink(paste0(file.path(spreadsheet.folder,sep=""),"metadata.txt"))
-    if("ods"%in%save.format){cat(paste0("\n File \"results_quantify_lu.ods\" saved:",file.path(spreadsheet.folder), "\n (approximately) at ",format(Sys.time(),"%H:%M", "\n")))}
-    if("RData"%in%save.format){cat(paste0("\n File \"results_quantify_lu.RData\" saved:",file.path(spreadsheet.folder), "\n (approximately) at ",format(Sys.time(),"%H:%M", "\n")))}
+    if("ods"%in%save.format){cat(paste0("\n File \"results_quantify_lu.ods\" saved:",file.path(spreadsheet.folder), "\n (approximately) at ",format(Sys.time(),"%H:%M"), "\n"))}
+    if("RData"%in%save.format){cat(paste0("\n File \"results_quantify_lu.RData\" saved:",file.path(spreadsheet.folder), "\n (approximately) at ",format(Sys.time(),"%H:%M"), "\n"))}
     cat("\n")
     print(x)
     sink()

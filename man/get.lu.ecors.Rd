@@ -57,13 +57,7 @@ get.lu.ecors(
 \item{online.storage}{select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.}
 }
 \value{
-Object of the "lu.ecors" class with metadata and pre-processed data to be used in the count.lu.ecors, dist.lu.ecors, plot.focal.lu.ecors, plot.lu.ecors or download.lu.ecors functions. Aditional Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit): \cr
-\itemize{
-\item lu (Land Use image: years stored as bands),
-\item polig.lu0.gee (reference polygons),
-\item polig.lu1.gee (buffer1 polygons),
-\item polig.lu2.gee (buffer2 polygons),
-\item polig.lu3.gee (buffer3 polygons).}
+Object of the "lu.ecors" class with metadata and pre-processed data to be used in the count.lu.ecors, dist.lu.ecors, plot.focal.lu.ecors, plot.lu.ecors or download.lu.ecors functions. Aditional Google Earth Engine container object lu (Land Use image: years stored as bands) is exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit). \cr
 }
 \description{
 Get Land Use data from Google Earth Engine for your study site and integrate with study polygons.
