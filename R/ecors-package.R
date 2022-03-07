@@ -3,7 +3,7 @@
 #' Package to simplify the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing pre-processing, visualization, data download and calculation of simple statistics commonly used in ecological studies. It aims to simplify the use of rgee and Google Earth Engine commands, performing internally several data manipulation steps. The function syntax follows a familiar style for R users who routinely perform statistical analysis for ecological studies. Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/).
 #' \cr
 #' @details
-#' Google Earth Engine main catalog
+#' Google Earth Engine main catalog - remote sensing data
 #' \itemize{
 #'    \item [get.ecors]	Get data to ecors
 #'    \item [stats.ecors]	Descritive statistics on ecors objects

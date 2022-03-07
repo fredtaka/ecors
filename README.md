@@ -1,15 +1,16 @@
 # ecors
 #### Remote Sensing data acquisition and processing for ecology with Google Earth Engine.
 
-\cr
-\cr
+<br>
+<br>
 
 Package to simplify the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing pre-processing, visualization, data download and calculation of simple statistics commonly used in ecological studies. It aims to simplify the use of rgee and Google Earth Engine commands, performing internally several data manipulation steps. The function syntax follows a familiar style for R users who perform statistical analysis in ecology.
 
 
 ## Instalation
 
-Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/). \n
+Requires pre-registration on the Google Earth Engine platform (https://earthengine.google.com/).
+
 
 Install package dependencies from CRAN:
 
@@ -93,7 +94,7 @@ Plotting options:
 ```r
 plot(x=d2020, ecors.type="filtered+mask")
 plot(x=d2020, ecors.type="mask", visualization="custom", defaults=F,
-           legend=T, bands="NDVI", pixel.min=-1, pixel.max=1, image.gamma=NULL)
+     legend=T, bands="NDVI", pixel.min=-1, pixel.max=1, image.gamma=NULL)
 plot(x=d2020, ecors.type="composite")
 ```
 
@@ -114,8 +115,8 @@ Download the images cropped to include the study site and small extra area aroun
 
 ```r
 download.ecors(x=d2020, ecors.type="composite",vis.bands=T,
-   ref.site=T,exp.degree=0.05,
-   images.folder=getwd(),clear.prov=F)
+               ref.site=T,exp.degree=0.05,
+               images.folder=getwd(),clear.prov=F)
 ```
 
 ### 5. Get land use maps
@@ -132,7 +133,8 @@ Get land use map in the areas surrounding the site:
 lu90_00_20<-get.lu.ecors(site=FAL.IBGE.JBB,
      projected=F, custom.crs=32723,
      collection.lu="mapbiomas6", years=c(1990,2000,2020),
-     evaluate="surroundings.site", buffer1=5000, buffer2=10000, buffer3=20000, cumulative.surroundings=F)
+     evaluate="surroundings.site", 
+     buffer1=5000, buffer2=10000, buffer3=20000, cumulative.surroundings=F)
 ```
 
 ### 6. Plot land use maps
@@ -158,9 +160,9 @@ Calculate the minimum distance from sampling points (mostly savanna) to areas of
 
 ```r
 lu20<-get.lu.ecors(points=test.points,
-     projected=F, custom.crs=32723,
-     collection.lu="mapbiomas6", years=c(2020),
-     evaluate="distance.samples")
+                   projected=F, custom.crs=32723,
+                   collection.lu="mapbiomas6", years=c(2020),
+                   evaluate="distance.samples")
      
 conv_lu20<-convert.lu.ecors(x=lu20,old.value = c(1,3),
                              new.value = c(1,1), new.lu.class = c("Forest","Forest"))

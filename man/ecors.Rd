@@ -9,7 +9,7 @@ Package to simplify the acquisition of data in Google Earth Engine and performs 
 \cr
 }
 \details{
-Google Earth Engine main catalog
+Google Earth Engine main catalog - remote sensing data
 \itemize{
 \item \link{get.ecors}	Get data to ecors
 \item \link{stats.ecors}	Descritive statistics on ecors objects
