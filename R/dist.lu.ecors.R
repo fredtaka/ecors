@@ -49,6 +49,8 @@ dist.lu.ecors<-function(x, class.value, stat.dist, max.dist, focal=F, window.rad
 
   if(focal==F & is.null(window.radius)==F){stop("Argument window.radius need to be NULL when focal is set to FALSE")}
 
+  polig.lu0.gee<-x$polig.lu0.gee
+
   npolyg<-polig.lu0.gee$size()$getInfo()
   if(npolyg>1){lista.polig<-ee$List(0:(npolyg-1))}
 
