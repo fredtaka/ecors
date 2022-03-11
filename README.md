@@ -4,7 +4,7 @@
 <br>
 <br>
 
-Package to simplify the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing pre-processing, visualization, data download and calculation of simple statistics commonly used in ecological studies. It aims to simplify the use of rgee and Google Earth Engine commands, performing internally several data manipulation steps. The function syntax follows a familiar style for R users who perform statistical analysis in ecology.
+R Package to simplify the acquisition of data in Google Earth Engine and performs several steps of organization and processing typical of ecological studies, allowing pre-processing, visualization, data download and calculation of simple statistics commonly used in ecological studies. It aims to simplify the use of rgee and Google Earth Engine commands, performing internally several data manipulation steps. The function syntax follows a familiar style for R users who perform statistical analysis in ecology.
 
 
 ## Instalation
