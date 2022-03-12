@@ -39,12 +39,14 @@
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #'
+#' #library(ecors)
+#'
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C01/T1_TOA", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.vis=T, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=NULL, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
+#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="season", composite=NULL)
 #'
 #' #Plotting
 #' #defaults
@@ -129,11 +131,11 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
 
   if(ecors.type=="composite"){
     colle.plot<-colle.mask.compo
-    if(sort.by=="season"){
+    if(group.by=="season"){
       n.img<-length(unique(images.table$rep.season))
       dates.plot<-unique(images.table$rep.season)
     }
-    if(sort.by=="month"){
+    if(group.by=="month"){
       n.img<-length(unique(images.table$rep.month))
       dates.plot<-unique(images.table$rep.month)
     }
@@ -272,8 +274,8 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
   }
 
   cat("  \n\n")
-  if(sort.by=="season"){
-    if(is.null(images.table$rep.season.image)==F){print(images.table%>%select(-images,-rep.season.image))} else {print(images.table%>%select(-images))} #else representa sort.by=="month"
+  if(group.by=="season"){
+    if(is.null(images.table$rep.season.image)==F){print(images.table%>%select(-images,-rep.season.image))} else {print(images.table%>%select(-images))} #else representa group.by=="month"
   }
 
   if(ecors.type%in%c("mask","filtered|mask","composite")){

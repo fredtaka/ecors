@@ -26,12 +26,13 @@
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #'
+#' #library(ecors)
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval=c("SR_B3","SR_B4"), bands.vis=F, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
+#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="season", composite=NULL)
 #'
 #' allpixels<-stats.ecors(x=d2020, edge.pixels="weighted", remove.samples=list(num.pixelOK=10,prop.pixelOK=0.8),
 #'                   summarizing="all", by.image.save=T, summary.save=T,
@@ -246,8 +247,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   f.codif.colunas<-function(tabela){
     nomes<-names(tabela)
     for (i in 1:nrow(images.table)){
-      if(sort.by=="season"){nomes<-gsub(pattern=images.table$images[i], replacement=images.table$rep.season.image[i], x=nomes)}
-      if(sort.by=="month"){nomes<-gsub(pattern=images.table$images[i], replacement=images.table$rep.month.image[i], x=nomes)}
+      if(group.by=="season"){nomes<-gsub(pattern=images.table$images[i], replacement=images.table$rep.season.image[i], x=nomes)}
+      if(group.by=="month"){nomes<-gsub(pattern=images.table$images[i], replacement=images.table$rep.month.image[i], x=nomes)}
     }
     return(nomes)
   }
@@ -269,8 +270,8 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
     warning("Cutoff value for minimum number of good pixels in samples was exceeded on some sample(s) - all results from that sample(s) will be deleted")}
 
   if(is.null(composite)==F){
-    if(sort.by=="season"){list.images.stat<-unique(images.table$rep.season)}
-    if(sort.by=="month"){list.images.stat<-unique(images.table$rep.month)}
+    if(group.by=="season"){list.images.stat<-unique(images.table$rep.season)}
+    if(group.by=="month"){list.images.stat<-unique(images.table$rep.month)}
   } else {
     list.images.stat<-images.table$images}
 
@@ -336,12 +337,12 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   }
 
   #refazendo o do get.ecors
-  if (sort.by=="season"){
+  if (group.by=="season"){
     seasons.used<-c("s1","s2","s3","s4")[lengths(seasons)>0]
     contador<-data.frame(matrix(nrow=1,ncol=length(seasons.used),c(0))) #versão para estações
     names(contador)<-seasons.used
   }
-  if (sort.by=="month"){
+  if (group.by=="month"){
     seasons.used<-1:12
     dates.table$season<-dates.table$month #provisório para usar versão genérica do contador de repetições -> vai ser mudado adiante para "month"
     contador<-data.frame(matrix(nrow=1,ncol=12,c(0))) #versão para meses
@@ -414,12 +415,12 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     tab.mean.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
     if(summarizing=="yearly"){
-      if(sort.by=="month"){tab.stat.samples$summary$mean<-f.sumarizadora.month.yearly(tab.mean.samples,"M")}
-      if(sort.by=="season"){tab.stat.samples$summary$mean<-f.sumarizadora.season.yearly(tab.mean.samples,"M")}
+      if(group.by=="month"){tab.stat.samples$summary$mean<-f.sumarizadora.month.yearly(tab.mean.samples,"M")}
+      if(group.by=="season"){tab.stat.samples$summary$mean<-f.sumarizadora.season.yearly(tab.mean.samples,"M")}
     }
     if(summarizing=="all"){
-      if(sort.by=="month"){tab.stat.samples$summary$mean<-f.sumarizadora.month.all(tab.mean.samples,"M")}
-      if(sort.by=="season"){tab.stat.samples$summary$mean<-f.sumarizadora.season.all(tab.mean.samples,"M")}
+      if(group.by=="month"){tab.stat.samples$summary$mean<-f.sumarizadora.month.all(tab.mean.samples,"M")}
+      if(group.by=="season"){tab.stat.samples$summary$mean<-f.sumarizadora.season.all(tab.mean.samples,"M")}
     }
     tab.stat.samples$summary$mean$get.ecor.date.time<-as.character(get.ecor.date.time)
     tab.stat.samples$results$mean<-tab.mean.samples
@@ -439,12 +440,12 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     tab.median.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
     if(summarizing=="yearly"){
-      if(sort.by=="month"){tab.stat.samples$summary$median<-f.sumarizadora.month.yearly(tab.median.samples,"Mn")}
-      if(sort.by=="season"){tab.stat.samples$summary$median<-f.sumarizadora.season.yearly(tab.median.samples,"Mn")}
+      if(group.by=="month"){tab.stat.samples$summary$median<-f.sumarizadora.month.yearly(tab.median.samples,"Mn")}
+      if(group.by=="season"){tab.stat.samples$summary$median<-f.sumarizadora.season.yearly(tab.median.samples,"Mn")}
     }
     if(summarizing=="all"){
-      if(sort.by=="month"){tab.stat.samples$summary$median<-f.sumarizadora.month.all(tab.median.samples,"Mn")}
-      if(sort.by=="season"){tab.stat.samples$summary$median<-f.sumarizadora.season.all(tab.median.samples,"Mn")}
+      if(group.by=="month"){tab.stat.samples$summary$median<-f.sumarizadora.month.all(tab.median.samples,"Mn")}
+      if(group.by=="season"){tab.stat.samples$summary$median<-f.sumarizadora.season.all(tab.median.samples,"Mn")}
     }
     tab.stat.samples$summary$median$get.ecor.date.time<-as.character(get.ecor.date.time)
     tab.stat.samples$results$median<-tab.median.samples
@@ -464,12 +465,12 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     tab.sd.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
     if(summarizing=="yearly"){
-      if(sort.by=="month"){tab.stat.samples$summary$sd<-f.sumarizadora.month.yearly(tab.sd.samples,"SD")}
-      if(sort.by=="season"){tab.stat.samples$summary$sd<-f.sumarizadora.season.yearly(tab.sd.samples,"SD")}
+      if(group.by=="month"){tab.stat.samples$summary$sd<-f.sumarizadora.month.yearly(tab.sd.samples,"SD")}
+      if(group.by=="season"){tab.stat.samples$summary$sd<-f.sumarizadora.season.yearly(tab.sd.samples,"SD")}
     }
     if(summarizing=="all"){
-      if(sort.by=="month"){tab.stat.samples$summary$sd<-f.sumarizadora.month.all(tab.sd.samples,"SD")}
-      if(sort.by=="season"){tab.stat.samples$summary$sd<-f.sumarizadora.season.all(tab.sd.samples,"SD")}
+      if(group.by=="month"){tab.stat.samples$summary$sd<-f.sumarizadora.month.all(tab.sd.samples,"SD")}
+      if(group.by=="season"){tab.stat.samples$summary$sd<-f.sumarizadora.season.all(tab.sd.samples,"SD")}
     }
     tab.stat.samples$summary$sd$get.ecor.date.time<-as.character(get.ecor.date.time)
     tab.stat.samples$results$sd<-tab.sd.samples
@@ -491,12 +492,12 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     tab.count.prop.samples$get.ecor.date.time<-as.character(get.ecor.date.time)
     if(summarizing=="yearly"){
-      if(sort.by=="month"){tab.stat.samples$summary$count<-f.sumarizadora.month.yearly(tab.count.prop.samples,"cnt")}
-      if(sort.by=="season"){tab.stat.samples$summary$count<-f.sumarizadora.season.yearly(tab.count.prop.samples,"cnt")}
+      if(group.by=="month"){tab.stat.samples$summary$count<-f.sumarizadora.month.yearly(tab.count.prop.samples,"cnt")}
+      if(group.by=="season"){tab.stat.samples$summary$count<-f.sumarizadora.season.yearly(tab.count.prop.samples,"cnt")}
     }
     if(summarizing=="all"){
-      if(sort.by=="month"){tab.stat.samples$summary$count<-f.sumarizadora.month.all(tab.count.prop.samples,"cnt")}
-      if(sort.by=="season"){tab.stat.samples$summary$count<-f.sumarizadora.season.all(tab.count.prop.samples,"cnt")}
+      if(group.by=="month"){tab.stat.samples$summary$count<-f.sumarizadora.month.all(tab.count.prop.samples,"cnt")}
+      if(group.by=="season"){tab.stat.samples$summary$count<-f.sumarizadora.season.all(tab.count.prop.samples,"cnt")}
     }
     tab.stat.samples$summary$count$get.ecor.date.time<-as.character(get.ecor.date.time)
     tab.stat.samples$results$count<-tab.count.prop.samples
@@ -515,7 +516,7 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
   metadata<-list(get.ecor.date.time=as.character(get.ecor.date.time), collection=collection, start=start, end=end,
                  dates.table=dates.table, images.table=images.table,
-                 composite=paste(composite,"by",sort.by), seasons=seasons, sort.by=sort.by, summarizing=summarizing,
+                 composite=paste(composite,"by",group.by), seasons=seasons, group.by=group.by, summarizing=summarizing,
                  bands.eval=bands.eval, indices=indices, bands.used=bands.used,
                  samples.stats=unlist(stats), edge.pixels=edge.pixels, buffer=unlist(list("Points->circles(m)"=buffer.points,"Plots(m)"=buffer.plots)),
                  samples=tab.npixels.samples, PixelsOK=tab.OK.samples[,-ncol(tab.OK.samples)])

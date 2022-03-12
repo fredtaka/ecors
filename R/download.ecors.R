@@ -33,12 +33,14 @@
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #'
+#' #library(ecors)
+#'
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", composite=NULL)
+#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="season", composite=NULL)
 #'
 #' #Download
 #' download.ecors(x=d2020, ecors.type="composite",vis.bands=T,
@@ -103,7 +105,7 @@ download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NU
 
   cat(paste("\nCollection of images obtained by running get.ecors function on",get.ecor.date.time,"\nImage table\n"))
 
-  if(sort.by=="season"){print(images.table%>%select(-images,-rep.season.image))}else{#else representa sort.by=="month"
+  if(group.by=="season"){print(images.table%>%select(-images,-rep.season.image))}else{#else representa group.by=="month"
     print(images.table%>%select(-images,-rep.month.image))}
 
   #download propriamente dito

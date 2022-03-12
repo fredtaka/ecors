@@ -79,7 +79,7 @@ d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
     start=c("2020-01-01"), end=c("2020-12-31"),
     bands.eval=c("SR_B3","SR_B4"), bands.vis=T, indices=c("NDVI"), resolution=30,
     eval.area="samples", pOK=0.7, c.prob=NULL, c.dist=100,
-    seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="season", 
+    seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="season", 
     composite="mean")
 ```
 

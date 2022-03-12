@@ -27,7 +27,7 @@
 #' @param CDI.threshold set threshold value for method CDI (see Frantz et al. 2018 for details).
 #' @param dmax.shadow set the maximum distance that CDI Algorithm will search for clouds. Large values take a lot of processing time or may crash Google Earth Engine. Value in meters (in multiples of 100 m).
 #' @param seasons month allocation (numerical form) in up to four seasons. Use the list structure list(s1=c(), s2=c(), s3=c(), s4=c()) keeping the items you don't want to use empty. More information in the exemples section.
-#' @param sort.by should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.
+#' @param group.by should data be grouped by "season" or "month"? This parameter influences how the data will be summarized in stats.ecors and (if selected) how the images will be composited.
 #' @param composite method for generating composite images in the collection Available options to argument composite: min, max, mean, median and NULL (disable composition).
 #' @param online.storage select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.
 #'
@@ -87,13 +87,15 @@
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
+#' #library(ecors)
+#'
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
 #'     eval.area="site", projected=F, custom.crs=32723,
 #'     collection="LANDSAT/LC08/C02/T1_L2", start=c("2020-01-01"), end=c("2020-12-31"),
 #'     bands.eval="SR_B3", bands.vis=T, indices=c("NDVI"), resolution=30,
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), sort.by="month", composite="mean")
+#'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="month", composite="mean")
 #'
 #' @import rgee
 #' @import rgeeExtra
@@ -107,7 +109,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
                     collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
                     eval.area="site", pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
                     cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
-                    seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), sort.by="month", composite=NULL,
+                    seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), group.by="month", composite=NULL,
                     online.storage="drive")
 
 
@@ -408,9 +410,9 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   if (length(unlist(seasons))!=length(unique(unlist(seasons)))){stop("Each month can only be allocated to one season. If you need other ways of separating dates (eg by day of the month), disable the use of stations and post-process the data for all dates.")}
 
   #Estações - checagens e organização
-  if(length(unlist(seasons))>0){sort.by<-"season"} else {sort.by<-"month"}
+  if(length(unlist(seasons))>0){group.by<-"season"} else {group.by<-"month"}
 
-  if(sort.by=="season"){
+  if(group.by=="season"){
     if(sum(duplicated(unlist(seasons)))>0){stop("A month cannot belong to more than one season.")}
 
     prov<-c(unlist(seasons)[1]:12,1:12)
@@ -820,12 +822,12 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   dates.table$season[dates.table$month%in%seasons$s3]<-"s3"
   dates.table$season[dates.table$month%in%seasons$s4]<-"s4"
 
-  if (sort.by=="season"){
+  if (group.by=="season"){
     seasons.used<-c("s1","s2","s3","s4")[lengths(seasons)>0]
     contador<-data.frame(matrix(nrow=1,ncol=length(seasons.used),c(0))) #versão para estações
     names(contador)<-seasons.used
   }
-  if (sort.by=="month"){
+  if (group.by=="month"){
     seasons.used<-1:12
     dates.table$season<-dates.table$month #provisório para usar versão genérica do contador de repetições -> vai ser mudado adiante para "month"
     contador<-data.frame(matrix(nrow=1,ncol=12,c(0))) #versão para meses
@@ -871,7 +873,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   #Indicando número de imagens por mês e estação e corrigindo tabelas sem estações
   dates.table$n.imagesOK<-NA
   for (i in 1:nrow(dates.table)){dates.table$n.imagesOK[i]<-nrow(images.table%>%filter(year==dates.table$year[i],month==dates.table$month[i]))}
-  if(sort.by=="month"){#para análises por mês
+  if(group.by=="month"){#para análises por mês
     dates.table$season<-"not.eval"
     images.table$season<-"not.eval"
   }
@@ -881,14 +883,14 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   #####################################
 
   #completando images.table: rep.season/month, imagem
-  if(sort.by=="month"){
+  if(group.by=="month"){
     if(max(images.table$rep)<10){#nome da coluna vai ser corrigido no final
       images.table<-images.table%>%mutate(rep.season=paste("r",rep,sprintf("m%02d",month),sep=""))
     } else {
       images.table<-images.table%>%mutate(rep.season=paste(sprintf("r%02d",rep),sprintf("m%02d",month),sep=""))
     }
   }
-  if(sort.by=="season"){
+  if(group.by=="season"){
     if(max(images.table$rep)<10){
       images.table<-images.table%>%mutate(rep.season=paste("r",rep,season,sep=""))
     } else {
@@ -970,10 +972,10 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
 
   colle.mask.compo<<-colle.mask.compo
 
-  if(sort.by=="month"){images.table<-mutate(images.table,rep.month=rep.season,rep.month.image=rep.season.image,rep.season=NULL,rep.season.image=NULL)} #corrigindo nome
+  if(group.by=="month"){images.table<-mutate(images.table,rep.month=rep.season,rep.month.image=rep.season.image,rep.season=NULL,rep.season.image=NULL)} #corrigindo nome
 
   out.get.ecors<-list(get.ecor.date.time=get.ecor.date.time, collection=collection, clouds.sentinel=clouds.sentinel, start=start, end=end, dates.inter=dates.inter,
-                       composite=composite, sort.by=sort.by, seasons=seasons, dates.table=dates.table, images.table=images.table,
+                       composite=composite, group.by=group.by, seasons=seasons, dates.table=dates.table, images.table=images.table,
                        bands.eval=bands.eval, indices=indices, bands.used=bandas, d.vpar=d.vpar, d.vpar.pan=d.vpar.pan, resolution=resolution,
                        buffer.points=buffer.points, buffer.plots=buffer.plots, area.m2=area.m2,
                        site.gee=site.gee, samples.gee=samples.gee) #reduzido (sem coleções)
