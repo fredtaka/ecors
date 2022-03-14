@@ -813,6 +813,27 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   ### expectativa de dados e dados obtidos #####
   ##############################################
 
+  single.season<-F #starting value (could be changed in the next lines)
+
+  if (group.by=="season"){
+    if(is.null(seasons$s2)){
+      single.season<-T
+      seasons$s2<-tail(seasons$s1,n=1)+1 #pseudo s2 (will be removed in the final dates.table)
+      if(seasons$s2==13){seasons$s2<-1}
+    }
+    seasons.used<-c("s1","s2","s3","s4")[lengths(seasons)>0]
+    contador<-data.frame(matrix(nrow=1,ncol=length(seasons.used),c(0))) #versão para estações
+    names(contador)<-seasons.used
+  }
+
+  if (group.by=="month"){
+    seasons.used<-1:12
+    dates.table$season<-dates.table$month #provisório para usar versão genérica do contador de repetições -> vai ser mudado adiante para "month"
+    contador<-data.frame(matrix(nrow=1,ncol=12,c(0))) #versão para meses
+    names(contador)<-1:12
+  }
+
+
   # tabela de expectativas de dados (por mês)
   dates.table<-data.frame(date=seq(from=start,to=end,by="month"), season=NA, rep=0)
   dates.table$year<-as.numeric(format(dates.table$date,format="%Y"))
@@ -822,21 +843,11 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   dates.table$season[dates.table$month%in%seasons$s3]<-"s3"
   dates.table$season[dates.table$month%in%seasons$s4]<-"s4"
 
-  if (group.by=="season"){
-    seasons.used<-c("s1","s2","s3","s4")[lengths(seasons)>0]
-    contador<-data.frame(matrix(nrow=1,ncol=length(seasons.used),c(0))) #versão para estações
-    names(contador)<-seasons.used
-  }
-  if (group.by=="month"){
-    seasons.used<-1:12
-    dates.table$season<-dates.table$month #provisório para usar versão genérica do contador de repetições -> vai ser mudado adiante para "month"
-    contador<-data.frame(matrix(nrow=1,ncol=12,c(0))) #versão para meses
-    names(contador)<-1:12
-  }
-
   dates.table<-na.exclude(dates.table)
 
   est.anterior<-c()
+
+
   for(i in 1:nrow(dates.table)){
     if(dates.table$season[i]%in%seasons.used | dates.table$season[i]=="month"){
       if(is.null(est.anterior)){
@@ -856,6 +867,13 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
         }
     }
   }
+
+  if(single.season==T){                             #removing pseudo s2
+    dates.table$season[dates.table$season=="s2"]<-NA
+    dates.table<-na.exclude(dates.table)
+    seasons<-list(s1=seasons$s1,s2=c(),s3=c(),s4=c())
+    }
+
 
   #imagens disponíveis com estações e repetições
   images.table<-data.frame(images=lista.imagens, OKdates=OKdates, season=NA, rep=NA)
