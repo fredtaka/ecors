@@ -23,6 +23,8 @@
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
+#' library(ecors)
+#'
 #' lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
 #'      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
@@ -55,16 +57,21 @@ download.lu.ecors<-function(x, exp.degree=0.05, images.folder=getwd(), clear.pro
   #download propriamente dito
   gdrive<-ee_image_to_drive(
     image = lu.prov,
-    folder = "rgee_prov",
+    folder = "ecors_temp",
     region = poli.ext.lu.gee)
 
   gdrive$start() #executando
-  ee_monitoring(gdrive)
+  ee_monitoring(task=gdrive,max_attempts=18)
 
-  ee_drive_to_local(
-    task=gdrive,
-    dsn=file.path(images.folder,paste0("LU",x$evaluate,"_",format(Sys.time(),"%H.%M"),".tif")))
+  tryCatch({
+    ee_drive_to_local(
+      task=gdrive,
+      dsn=file.path(images.folder,paste0("LU",x$evaluate,"_",format(Sys.time(),"%H.%M"),".tif")))
 
-  if(clear.prov==T){ee_clean_container(name = "rgee_prov", type = "drive", quiet = FALSE)} else {
-    cat("\nImage files are also stored in your Google Drive account on rgee_prov folder.\n") }
+    if(clear.prov==T){ee_clean_container(name = "ecors_temp", type = "drive", quiet = FALSE)} else {
+      cat("\nImage files are also stored in your Google Drive account on ecors_temp folder.\n") }
+
+    }, error=function(e){
+    print("Maximum wait time exceeded for automatic download. Check the ecors_temp folder in your Google Drive account in a few minutes for manual download. The file name will start with myExportImageTask ending with the date and time the file was created.")}
+  )
 }
