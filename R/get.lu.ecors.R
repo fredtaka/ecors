@@ -87,6 +87,7 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   if(is.null(site)==F){
     if(is.null(custom.crs)){site<-st_transform(site,crs=custom.crs)}
     site.gee<-sf_as_ee(site)
+    cat("\nSite polygon loaded \n")
   } else {site.gee<-NULL}
 
 
@@ -110,16 +111,15 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
       circles<-st_transform(circles,crs=points.crs)
     }
 
-    cat("\n Points converted to 1 m diameter circles. \n") #here is different from get.ecors
+    cat("\nPoints converted to 1 m diameter circles. \n") #here is different from get.ecors
 
     names(circles)[names(circles)==attr(circles,"sf_column")]<-"geometry" #geometry may or not have this name. This makes consistent between objects.
     st_geometry(circles)<-"geometry"
     names(circles)[id.column]<-"id"
     circles<-circles[,id.column]
     circles$type<-"circles"
-    circles.gee<-sf_as_ee(circles)
     samples<-circles #se houver points e plots, vai corrigir adiante
-  } else {cat("\n No valid file with points \n")}
+  } else {cat("\nNo valid file with points \n")}
 
 
   #plots (several differences from get.ecors: do not apply buffer here)
@@ -131,7 +131,8 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
     plots<-plots[,id.column]
     plots$type<-"plots"
     samples<-plots #pode sobrescrever mas se houver points e plots, vai corrigir adiante
-  } else {cat("\n No valid file with plots \n")}
+    cat("\nPlots loaded \n")
+  } else {cat("\nNo valid file with plots \n")}
 
 
   #samples (consolidanting)
