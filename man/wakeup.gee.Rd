@@ -9,9 +9,6 @@ wakeup.gee(online.storage = "drive")
 \arguments{
 \item{online.storage}{select online storage integration (mandatory for images download). Options are "drive" for Google Drive, "gcs" for Google Cloud Storage or NULL.}
 }
-\value{
-
-}
 \description{
 If you receive an error message regarding the Google Earth Engine server being disconnected due to inactivity, use this command to re-establish the connection.
 }
