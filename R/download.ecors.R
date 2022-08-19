@@ -7,8 +7,8 @@
 #' @param subset numerical vector with selected images (sequential number of images, eg. c(1, 2, 5) )
 #' @param vis.bands include vizualization bands in the download?
 #' @param new.list.bands selects a subset of bands to download (among those previously chosen in get.ecors).
-#' @param ref.site use site extent as reference for the downloaded images extent?
-#' @param ref.samples use samples extent as reference for the downloaded images extent?
+#' @param ref.site use site extent as reference for the downloaded images extent? (TRUE or FALSE)
+#' @param ref.samples use samples extent as reference for the downloaded images extent? (TRUE or FALSE)
 #' @param new.ref.poly set a new polygon as reference for the downloaded images extent.
 #' @param exp.degree number of degrees to expand (and in all directions) the extent of downloaded images (decimal degree format).
 #' @param images.folder local folder to save images files.
@@ -47,9 +47,14 @@
 #'    new.list.bands=NULL,ref.site=T,ref.samples=T,exp.degree=0.05,
 #'    images.folder=getwd(),clear.prov=F)
 #'
-download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NULL,ref.site=T,ref.samples=T,new.ref.poly=NULL,exp.degree=0.05,images.folder=getwd(),clear.prov=F){
+download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NULL,ref.site=F,ref.samples=F,new.ref.poly=NULL,
+                         exp.degree=0.05,images.folder=getwd(),clear.prov=F){
 
   if(class(x)!="ecors"){stop("Argument x must be a ecors class object.")}
+
+  if(ref.site!=T&ref.samples!=T&is.null(new.ref.poly)==T){
+    stop("Need to select reference objects for extent. Set ref.site = T or ref.samples = T or assign a polygon to the argument new.ref.poly.")}
+
 
   list2env(x,envir=environment())
 
@@ -74,7 +79,7 @@ download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NU
     poli.usados<-poli.usados$merge(prov)
   }
 
-  poli.usados<-poli.usados$geometry(1)$transform() #coleção de coleções -> coleção e converte para geometria com WG84 (default) #valor 1: margem de erro para conversão (obrigatório nesse caso)
+  poli.usados<-poli.usados$geometry(maxError=1)$transform(maxError=1) #coleção de coleções -> coleção e converte para geometria com WG84 (default); valor 1: margem de erro para conversão (obrigatório nesse caso)
   poli.bounds<-poli.usados$bounds()$getInfo()
   poli.bounds<-unlist(poli.bounds)
   poli.ext<-as.numeric(c(poli.bounds[3],poli.bounds[4],poli.bounds[7],poli.bounds[8]))+c(-exp.degree,-exp.degree,exp.degree,exp.degree)
@@ -97,9 +102,9 @@ download.ecors<-function(x, ecors.type,subset=NULL,vis.bands=T,new.list.bands=NU
     if(length(new.list.bands)>1){
       cat("\nIf you have problems to download custom bands: is not possible to download simultaneously bands of different data types (ex. optical bands, pixel quality and calculated indices).\n \n___ ")
     }
-        bands.download<-new.list.bands} else {#caso não especifique new.list.bands será:
+    bands.download<-new.list.bands} else {#caso não especifique new.list.bands será:
       bands.download<-bands.eval
-      }
+    }
 
   if(vis.bands==T){bands.download<-unique(c(bands.download,d.vpar$bands))}
 
