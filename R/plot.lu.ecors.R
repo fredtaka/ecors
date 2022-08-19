@@ -61,10 +61,10 @@ plot.lu.ecors<-function(x,comp=NULL,zoom=12,legend=T){
   }
 
   #To get center
-  if(x$evaluate=="surroundings.site"){center.poly.transf<-x$site.gee$geometry(1)$transform()}
-  if(x$evaluate=="surroundings.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform()}
-  if(x$evaluate=="inside.polygons"){center.poly.transf<-x$polygons.gee$geometry(1)$transform()}
-  if(x$evaluate=="distance.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform()}
+  if(x$evaluate=="surroundings.site"){center.poly.transf<-x$site.gee$geometry(1)$transform(maxError=10)}#convert to WG84 (default); maxError value is mandatory (since 2022)
+  if(x$evaluate=="surroundings.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform(maxError=10)}
+  if(x$evaluate=="inside.polygons"){center.poly.transf<-x$polygons.gee$geometry(1)$transform(maxError=10)}
+  if(x$evaluate=="distance.samples"){center.poly.transf<-x$samples.gee$geometry(1)$transform(maxError=10)}
 
 
   center<-center.poly.transf$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
