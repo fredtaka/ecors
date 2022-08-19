@@ -10,8 +10,8 @@ download.ecors(
   subset = NULL,
   vis.bands = T,
   new.list.bands = NULL,
-  ref.site = T,
-  ref.samples = T,
+  ref.site = F,
+  ref.samples = F,
   new.ref.poly = NULL,
   exp.degree = 0.05,
   images.folder = getwd(),
@@ -29,9 +29,9 @@ download.ecors(
 
 \item{new.list.bands}{selects a subset of bands to download (among those previously chosen in get.ecors).}
 
-\item{ref.site}{use site extent as reference for the downloaded images extent?}
+\item{ref.site}{use site extent as reference for the downloaded images extent? (TRUE or FALSE)}
 
-\item{ref.samples}{use samples extent as reference for the downloaded images extent?}
+\item{ref.samples}{use samples extent as reference for the downloaded images extent? (TRUE or FALSE)}
 
 \item{new.ref.poly}{set a new polygon as reference for the downloaded images extent.}
 
