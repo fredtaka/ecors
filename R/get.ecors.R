@@ -34,10 +34,20 @@
 #' @details
 #' Currently ecors supports the following remote sensing data collections:
 #'
+#'#' \cr
+#' Landsat 9
+#' \itemize{
+#' \item "LANDSAT/LC09/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_L2)
+#' \item "LANDSAT/LC09/C02/T1_TOA" [Collection 2 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_TOA)
+#' \item "LANDSAT/LC09/C02/T1" [Collection 2 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1)
+#' }
+#'
 #' \cr
 #' Landsat 8
 #' \itemize{
 #' \item "LANDSAT/LC08/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2)
+#' \item "LANDSAT/LC08/C02/T1_TOA" [Collection 2 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA)
+#' \item "LANDSAT/LC08/C02/T1" [Collection 2 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1)
 #' \item "LANDSAT/LC08/C01/T1_SR" [Collection 1 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR)
 #' \item "LANDSAT/LC08/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_TOA)
 #' \item "LANDSAT/LC08/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1)
@@ -47,6 +57,8 @@
 #' Landsat 7
 #' \itemize{
 #' \item "LANDSAT/LE07/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2)
+#' \item "LANDSAT/LE07/C02/T1_TOA" [Collection 2 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA)
+#' \item "LANDSAT/LE07/C02/T1" [Collection 2 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1)
 #' \item "LANDSAT/LE07/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA)
 #' \item "LANDSAT/LE07/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1)
 #' }
@@ -76,6 +88,8 @@
 #' @references
 #' Pixel quality control information: \cr
 #' Frantz, D., Hass, E., Uhl, A., Stoffels, J., & Hill, J. (2018). Improvement of the Fmask algorithm for Sentinel-2 images: Separating clouds from bright surfaces based on parallax effects. Remote sensing of environment, 215, 471-481. \cr
+#' <https://www.usgs.gov/media/files/landsat-8-9-olitirs-collection-2-level-1-data-format-control-book> \cr
+#' <https://www.usgs.gov/media/files/landsat-8-9-olitirs-collection-2-level-2-data-format-control-book> \cr
 #' <https://www.usgs.gov/media/files/landsat-7-etm-collection-2-level-2-data-format-control-book> \cr
 #' <https://www.usgs.gov/media/files/landsat-4-5-tm-collection-2-level-2-data-format-control-book> \cr
 #' <https://www.usgs.gov/media/files/landsat-8-collection-1-land-surface-reflectance-code-product-guide> \cr
@@ -126,11 +140,18 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   if(collection%in%c(
     "COPERNICUS/S2_SR",
     "COPERNICUS/S2",
+    "LANDSAT/LC09/C02/T1_L2",
+    "LANDSAT/LC09/C02/T1_TOA",
+    "LANDSAT/LC09/C02/T1",
     "LANDSAT/LC08/C02/T1_L2",
+    "LANDSAT/LC08/C02/T1_TOA",
+    "LANDSAT/LC08/C02/T1",
     "LANDSAT/LC08/C01/T1_SR",
     "LANDSAT/LC08/C01/T1_TOA",
     "LANDSAT/LC08/C01/T1",
     "LANDSAT/LE07/C02/T1_L2",
+    "LANDSAT/LE07/C02/T1_TOA",
+    "LANDSAT/LE07/C02/T1",
     "LANDSAT/LE07/C01/T1_TOA",
     "LANDSAT/LE07/C01/T1",
     "NASA/GPM_L3/IMERG_V06",
@@ -192,6 +213,11 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     valOK<-c(0)
   }
 
+  ### TODO: inserir LS9 e Coleção 2 do ToA e Raw do LS8 e LS7
+  #estudar diferença do QA_PIXEL quando o Bit 2 é usado (ex. LS8 C2 surface Reflectance) e quando não é usado (ex. LS8 C2 ToA e Raw)
+  #indicador de qualidade parece razoavelmente padronizado na C2 (que é totalmente diferente da C1)
+  # https://www.binary-code.org/binary/16bit/0000000001000000/
+
   ### Landsat 8 (coleção 2)
   if(collection=="LANDSAT/LC08/C02/T1_L2"){
     #datas
@@ -208,7 +234,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     banda.qualidade<-"QA_PIXEL"
     banda.qualidade.auxiliar<-"ST_CDIST"
     tipo.qualidade.auxiliar<-"c.dist"
-    valOK<-c(21824)
+    valOK<-c(21824) #inclui água com o código 21952 . #TODO Entretanto isso traz implicação no comando imagem<-imagem$select(banda.qualidade)$eq(valOK)  #TODO
   }
 
   ### Landsat 8 (coleção 1) - Surface Reflectance
@@ -370,8 +396,10 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
 
   get.ecor.date.time<-Sys.time() #para identificar a data/hora de início de execução nos arquivos de saída
 
-  start<-as.Date(start)
-  end<-as.Date(end)
+  tryCatch({
+    start<-as.Date(start)
+    end<-as.Date(end)
+  },error=function(e){cat("Error in start or end date. Do these dates exist? (eg did you indicate the 31st of the month with 30 days?)")})
 
   if(start < periodo.sat$start | end > periodo.sat$end ){stop(paste("Selected period exceeds data availability . \n Collection",collection, "have data from", periodo.sat$start, "to",ifelse(periodo.sat$end>as.Date("2500-01-01"),"present (with delay)",periodo.sat$end)),".")}
 
@@ -384,7 +412,6 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   if ("NDVI"%in%indices){bandas<-sort(unique(c(bandas,lista.bandas.indices$RED,lista.bandas.indices$NIR)))}
   if ("NBR"%in%indices){bandas<-sort(unique(c(bandas,lista.bandas.indices$NIR,lista.bandas.indices$SWIR2)))}
   if (bands.vis==T){bandas<-sort(unique(c(bandas,d.vpar$bands,d.vpar.pan$bands)))}
-  bands.eval.indices<-c(bands.eval,indices)
 
   if(is.null(c.dist)==F){if(c.dist==0){c.dist<-NULL}}
   if(is.null(c.prob)==F & ifelse(is.null(tipo.qualidade.auxiliar),T,"c.prob"%in%tipo.qualidade.auxiliar==F)){stop("Selected collection do not support cloud probability quality criterion. Set c.prob=NULL")}
@@ -518,7 +545,15 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     if(is.null(samples) || "sf" %in% class(samples)==F){stop(print("When eval.area=\"samples\" you need to set a sf object to samples argument."))}
     eval.area.gee<-sf_as_ee(samples)}
 
-  if(is.null(site)){site.gee<-NULL} else {site.gee<-sf_as_ee(site)}
+  if(is.null(site)){site.gee<-NULL} else
+    {site.gee<-sf_as_ee(site)
+    cat("\n Site polygon loaded \n")
+    }
+
+  if(is.null(plots)==F){cat("\n Plots loaded \n")}
+  if(is.null(points)==F){cat("\n Points loaded \n")}
+
+
   if(is.null(samples)){samples.gee<-NULL} else {samples.gee<-sf_as_ee(samples)}
 
   ##################################################
@@ -813,6 +848,15 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   ### expectativa de dados e dados obtidos #####
   ##############################################
 
+  # tabela de expectativas de dados (por mês)
+  dates.table<-data.frame(date=seq(from=start,to=end,by="month"), season=NA, rep=0)
+  dates.table$year<-as.numeric(format(dates.table$date,format="%Y"))
+  dates.table$month<-as.numeric(format(dates.table$date,format="%m"))
+  dates.table$season[dates.table$month%in%seasons$s1]<-"s1"
+  dates.table$season[dates.table$month%in%seasons$s2]<-"s2"
+  dates.table$season[dates.table$month%in%seasons$s3]<-"s3"
+  dates.table$season[dates.table$month%in%seasons$s4]<-"s4"
+
   single.season<-F #starting value (could be changed in the next lines)
 
   if (group.by=="season"){
@@ -833,21 +877,9 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     names(contador)<-1:12
   }
 
-
-  # tabela de expectativas de dados (por mês)
-  dates.table<-data.frame(date=seq(from=start,to=end,by="month"), season=NA, rep=0)
-  dates.table$year<-as.numeric(format(dates.table$date,format="%Y"))
-  dates.table$month<-as.numeric(format(dates.table$date,format="%m"))
-  dates.table$season[dates.table$month%in%seasons$s1]<-"s1"
-  dates.table$season[dates.table$month%in%seasons$s2]<-"s2"
-  dates.table$season[dates.table$month%in%seasons$s3]<-"s3"
-  dates.table$season[dates.table$month%in%seasons$s4]<-"s4"
-
   dates.table<-na.exclude(dates.table)
 
   est.anterior<-c()
-
-
   for(i in 1:nrow(dates.table)){
     if(dates.table$season[i]%in%seasons.used | dates.table$season[i]=="month"){
       if(is.null(est.anterior)){
