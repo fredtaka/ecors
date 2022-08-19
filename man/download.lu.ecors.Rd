@@ -20,9 +20,6 @@ download.lu.ecors(
 
 \item{clear.prov}{delete ALL files from temporary folder (ecors_temp) in your Google Drive account after download?}
 }
-\value{
-
-}
 \description{
 Download from Google Earth Engine all Land Use images selected by get.lu.ecors function.
 }
@@ -31,6 +28,8 @@ Download from Google Earth Engine all Land Use images selected by get.lu.ecors f
 FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecors"))
 test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
+
+library(ecors)
 
 lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
