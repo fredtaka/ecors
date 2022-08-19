@@ -69,9 +69,9 @@ plot.ecors<-function(x, ecors.type, visualization="vis.bands", zoom=10, defaults
   list2env(x,envir=environment())
 
   if(is.null(site.gee)==F){
-    poligono<-site.gee$geometry()$transform()#converte para WG84 (default)
+    poligono<-site.gee$geometry()$transform(maxError=10)#convert to WG84 (default); maxError value is mandatory (since 2022)
   } else {
-    poligono<-samples.gee$geometry()$transform()#converte para WG84 (default)
+    poligono<-samples.gee$geometry()$transform(maxError=10)#convert to WG84 (default); maxError value is mandatory (since 2022)
   }
   centro<-poligono$centroid()$getInfo()$coordinates #esse comando é incompatível com UTM
 
