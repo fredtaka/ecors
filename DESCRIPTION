@@ -1,6 +1,6 @@
 Package: ecors
 Title: Remote Sensing data acquisition and processing for ecology with Google Earth Engine
-Version: 0.9.3
+Version: 1.0.1
 Authors@R: 
     person("Frederico", "Takahashi", , "fredtaka@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9410-7885 "))
@@ -8,9 +8,9 @@ Description: It simplifies the acquisition of data in Google Earth Engine and pe
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Depends:
-  R (>= 4.1.2), rgee (>= 1.1.2), sf (>= 1.0-5)
+  R (>= 4.2.1), rgee (>= 1.1.4), sf (>= 1.0-7), dplyr
 Imports:
   rgee,
   rgeeExtra,
