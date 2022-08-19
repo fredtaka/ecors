@@ -64,7 +64,7 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
   if(substr(spreadsheet.folder,nchar(spreadsheet.folder),nchar(spreadsheet.folder))=="/"){spreadsheet.folder<-substr(spreadsheet.folder,1,nchar(spreadsheet.folder)-1)}
 
-  if (summarizing=="yearly" & is.null(composite)==F){stop("Annual summarization of composited images makes no sense: two different (and incompatible) ways of summarizing season or month data. \n Use summarizing=\"all\" or rerun get.ecors function with composite=NULL")}
+  if (summarizing=="yearly" & is.null(composite)==F){stop("Annual summarization of composited images makes no sense: two different (and incompatible) ways of summarizing season or month data. \nUse summarizing=\"all\" or rerun get.ecors function with composite=NULL")}
   bands.eval.indices<-c(bands.eval,indices)
 
   if(is.null(bands.index.subset)==F){
@@ -156,30 +156,30 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   if (edge.pixels=="weighted"){
 
     if(stats$mean==T){
-      cat("\n Processing means on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing means on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.mean.samples<-ee_extract(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$mean())
     }
 
     if(stats$median==T){
-      cat("\n Processing medians on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing medians on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.median.samples<-ee_extract(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$median())
     }
 
     if(stats$sd==T){
-      cat("\n Processing sd on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing sd on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.sd.samples<-ee_extract(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$stdDev())
     }
 
     if(stats$count==T){
-      cat("\n Counting pixels on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nCounting pixels on",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.count.samples<-ee_extract(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum())
 
-      cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.npixels.samples<-ee_extract(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na imagem de pixels1
       tab.npixelsOK.samples<-ee_extract(x=pixels1.masca.full.range,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na coleção (pixels1 com múltiplas máscaras)
     }
     if(stats$count==F){
-      cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing proportion of OK pixels in each sample of",n.imagens.est,"images (method: weighted). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.npixels.samples<-ee_extract(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na imagem de pixels1
       tab.npixelsOK.samples<-ee_extract(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()) #valores na coleção (pixels1 com múltiplas máscaras)
     }
@@ -189,30 +189,30 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   if (edge.pixels=="centroid"){ #emprega o workaround do ee_extract2 -> adaptado para funcionar com $unweighted -> checar se válido/necessário nas novas versões do rgee (atsamplesl é versão 1.0.9)
 
     if(stats$mean==T){
-      cat("\n Processing means on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing means on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.mean.samples<-ee_extract2(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$mean()$unweighted(),fun_name="mean")
     }
 
     if(stats$median==T){
-      cat("\n Processing medians on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing medians on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.median.samples<-ee_extract2(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$median()$unweighted(),fun_name="median")
     }
 
     if(stats$sd==T){
-      cat("\n Processing sd on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing sd on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.sd.samples<-ee_extract2(x=colle.stat,y=samples.gee,scale=resolution,fun=ee$Reducer$stdDev()$unweighted(),fun_name="stdDev")
     }
 
     if(stats$count==T){
-      cat("\n Counting pixels (of values > lower.cutoff and < upper.cutoff) on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nCounting pixels (of values > lower.cutoff and < upper.cutoff) on",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.count.samples<-ee_extract2(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()$unweighted(),fun_name="sum")
 
-      cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing proportion of OK pixels in each sample of",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.npixels.samples<-ee_extract2(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()$unweighted(),fun_name="sum") #valores na imagem de pixels1
       tab.npixelsOK.samples<-ee_extract2(x=pixels1.masca.full.range,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()$unweighted(),fun_name="sum") #valores na coleção (pixels1 com múltiplas máscaras)
     }
     if(stats$count==F){
-      cat("\n Processing proportion of OK pixels in each sample of",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"))
+      cat("\nProcessing proportion of OK pixels in each sample of",n.imagens.est,"images (method: centroid). Started at",format(Sys.time(),"%H:%M"),"\n")
       tab.npixels.samples<-ee_extract2(x=pixels1,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()$unweighted(),fun_name="sum") #valores na imagem de pixels1
       tab.npixelsOK.samples<-ee_extract2(x=pixels1.masca,y=samples.gee,scale=resolution,fun=ee$Reducer$sum()$unweighted(),fun_name="sum") #valores na coleção (pixels1 com múltiplas máscaras)
     }
@@ -260,7 +260,7 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
   names(tab.OK.samples)<-f.codif.colunas(tab.OK.samples)
   if(by.image.save==T | summary.save==T){
     write.csv(tab.OK.samples,file=file.path(spreadsheet.folder,"tab.quality.samples.csv"))
-    cat(paste0("_____\n File with sample data quality indicators saved as: \n",file.path(spreadsheet.folder,"tab.quality.samples.csv"), "\n_____"))}
+    cat(paste0("_____\nFile with sample data quality indicators saved as: \n",file.path(spreadsheet.folder,"tab.quality.samples.csv"), "\n_____"))}
   tab.stat.samples$data.quality<-tab.OK.samples
 
   #checagem de configurações de usuário: mínimo de pixels OK e número de pixels da samples
@@ -427,10 +427,10 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     if(by.image.save==T){
       write.csv(tab.mean.samples,file=file.path(spreadsheet.folder,"results.mean.samples.csv"))
-      cat(paste0("_____\n File with data by image was saved as: \n",file.path(spreadsheet.folder,"results.mean.samples.csv"), "\n_____"))}
+      cat(paste0("_____\nFile with data by image was saved as: \n",file.path(spreadsheet.folder,"results.mean.samples.csv"), "\n_____"))}
     if(summary.save==T){
       write.csv(tab.stat.samples$summary$mean,file=file.path(spreadsheet.folder,"summary.mean.samples.csv"))
-      cat(paste("_____\n File with summarizingd data was saved as: \n",file.path(spreadsheet.folder,"summary.mean.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with summarizingd data was saved as: \n",file.path(spreadsheet.folder,"summary.mean.samples.csv"), "\n_____"))}
   }
 
   ### Median
@@ -452,10 +452,10 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     if(by.image.save==T){
       write.csv(tab.median.samples,file=file.path(spreadsheet.folder,"results.median.samples.csv"))
-      cat(paste("_____\n File with data by image was saved as: \n",file.path(spreadsheet.folder,"results.median.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with data by image was saved as: \n",file.path(spreadsheet.folder,"results.median.samples.csv"), "\n_____"))}
     if(summary.save==T){
       write.csv(tab.stat.samples$summary$median,file=file.path(spreadsheet.folder,"summary.median.samples.csv"))
-      cat(paste("_____\n File with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.median.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.median.samples.csv"), "\n_____"))}
   }
 
   ### SD
@@ -477,10 +477,10 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     if(by.image.save==T){
       write.csv(tab.sd.samples,file=file.path(spreadsheet.folder,"results.sd.samples.csv"))
-      cat(paste("_____\n File with data by image was saved as: \n",file.path(spreadsheet.folder,"results.sd.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with data by image was saved as: \n",file.path(spreadsheet.folder,"results.sd.samples.csv"), "\n_____"))}
     if(summary.save==T){
       write.csv(tab.stat.samples$summary$sd,file=file.path(spreadsheet.folder,"summary.sd.samples.csv"))
-      cat(paste("_____\n File with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.sd.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.sd.samples.csv"), "\n_____"))}
   }
 
   ### Count
@@ -506,10 +506,10 @@ stats.ecors<-function(x, edge.pixels="weighted", remove.samples=list(num.pixelOK
 
     if(by.image.save==T){
       write.csv(tab.count.prop.samples,file=file.path(spreadsheet.folder,"results.count.samples.csv"))
-      cat(paste("_____\n File with data by image was saved as: \n",file.path(spreadsheet.folder,"results.count.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with data by image was saved as: \n",file.path(spreadsheet.folder,"results.count.samples.csv"), "\n_____"))}
     if(summary.save==T){
       write.csv(tab.stat.samples$summary$count,file=file.path(spreadsheet.folder,"summary.count.samples.csv"))
-      cat(paste("_____\n File with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.count.samples.csv"), "\n_____"))}
+      cat(paste("_____\nFile with summarized data was saved as: \n",file.path(spreadsheet.folder,"summary.count.samples.csv"), "\n_____"))}
   }
   cat("\n")
 
