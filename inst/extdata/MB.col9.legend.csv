@@ -1,0 +1,39 @@
+color,pixel.value,lu.class
+#ffffff,0,0. No Data
+#1f8d49,1,1. Forest
+#1f8d49,3,1.1. Forest Formation
+#7dc975,4,1.2. Savanna Formation
+#04381d,5,1.3. Mangrove
+#d6bc74,6,1.4 Floodable Forest
+#6b9932,49,1.5. Wooded Sandbank Vegetation
+#d6bc74,10,2. Herbaceous and Shrubby Vegetation
+#519799,11,2.1. Wetland
+#d6bc74,12,2.2. Grassland
+#fc8114,32,2.3. Hypersaline Tidal Flat
+#ffaa5f,29,2.4. Rocky Outcrop
+#ad5100,50,2.5. Herbaceous Sandbank Vegetation
+#ffefc3,14,3. Farming
+#edde8e,15,3.1. Pasture
+#E974ED,18,3.2. Agriculture
+#C27BA0,19,3.2.1. Temporary Crop
+#f5b3c8,39,3.2.1.1. Soybean
+#db7093,20,3.2.1.2. Sugar cane
+#c71585,40,3.2.1.3. Rice
+#ff69b4,62,3.2.1.4. Cotton (beta)
+#f54ca9,41,3.2.1.5. Other Temporary Crops
+#d082de,36,3.2.2. Perennial Crop
+#d68fe2,46,3.2.2.1. Coffee
+#9932cc,47,3.2.2.2. Citrus
+#9065d0,35,3.2.2.3. Palm Oil
+#e6ccff,48,3.2.2.4. Other Perennial Crops
+#7a5900,9,3.3. Forest Plantation
+#ffefc3,21,3.4. Mosaic of Uses
+#d4271e,22,4. Non vegetated area
+#ffa07a,23,"4.1. Beach, Dune and Sand Spot"
+#d4271e,24,4.2. Urban Area
+#9c0027,30,4.3. Mining
+#db4d4f,25,4.4. Other non Vegetated Areas
+#2532e4,26,5. Water
+#2532e4,33,"5.1. River, Lake and Ocean"
+#091077,31,5.2. Aquaculture
+#ffffff,27,6. Not Observed

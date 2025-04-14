@@ -37,25 +37,27 @@
 #' test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 #' test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 #'
+#' #Inilialize rgee package as described in: https://github.com/r-spatial/rgee/issues/355#issuecomment-1901404132
+#'
 #' # Get data (projecting to UTM 32S zone to performe buffer operations)
 #' lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
-#'      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
+#'      collection.lu="mapbiomas9", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
 #'      buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
 #'
 #'
-get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.column=1, projected=FALSE, custom.crs=NULL, collection.lu="mapbiomas6", years, resolution=30, evaluate,
+get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.column=1, projected=FALSE, custom.crs=NULL, collection.lu="mapbiomas9", years, resolution=30, evaluate,
                        buffer1=0, buffer2=0, buffer3=0, cumulative.surroundings=F, online.storage="drive"){
 
   ### Organizando
   get.lu.ecor.date.time<-Sys.time() #para identificar a data/hora de início de execução nos arquivos de saída
 
-  if(is.null(online.storage)){ee_Initialize(user = 'ndef', drive = F, gcs = F)}
-  if(online.storage=="gcs"){ee_Initialize(user = 'ndef', drive = F, gcs = T)}
-  if(online.storage=="drive"){ee_Initialize(user = 'ndef', drive = T, gcs = F)}
+  # if(is.null(online.storage)){ee_Initialize(user = 'ndef', drive = F, gcs = F)}
+  # if(online.storage=="gcs"){ee_Initialize(user = 'ndef', drive = F, gcs = T)}
+  # if(online.storage=="drive"){ee_Initialize(user = 'ndef', drive = T, gcs = F)}
 
 
-  if(collection.lu%in%c("mapbiomas5","mapbiomas6")==F){stop("Currently, only \"mapbiomas5\",\"mapbiomas6\" (MapBiomas collections 5 and 6) are supported (use the latest if you do not reasons to do otherwise).")}
+  if(collection.lu%in%c("mapbiomas9")==F){stop("Currently, only \"mapbiomas9\" (MapBiomas collection 9) are supported (use the latest if you do not reasons to do otherwise).")}
 
   if(evaluate%in%c("surroundings.samples", "surroundings.site", "inside.polygons", "distance.samples")==F){
     stop("Argument evaluate must be surroundings.samples, surroundings.site, inside.polygons or distance.samples.")}
@@ -147,16 +149,22 @@ get.lu.ecors<-function(site=NULL, points=NULL, plots=NULL, polygons=NULL, id.col
   } else {polygons.gee<-NULL}
 
   #MapBiomas
-  if(collection.lu=="mapbiomas5"){
-    lu<-ee$Image("projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1")
-    legend.lu<-read.csv(system.file("extdata","MB.col5.legend.csv",package="ecors"))
-    if(sum(years<1985)+sum(years>2019)>0){stop("\nDates for MapBiomas Collection 5 must be between 1985 and 2019")}
-  } #legenda obtida de: https://github.com/mapbiomas-brazil/integration-toolkit/blob/master/mapbiomas-integration-toolkit.js
+  # if(collection.lu=="mapbiomas5"){
+  #   lu<-ee$Image("projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1")
+  #   legend.lu<-read.csv(system.file("extdata","MB.col5.legend.csv",package="ecors"))
+  #   if(sum(years<1985)+sum(years>2019)>0){stop("\nDates for MapBiomas Collection 5 must be between 1985 and 2019")}
+  # } #legenda obtida de: https://github.com/mapbiomas-brazil/integration-toolkit/blob/master/mapbiomas-integration-toolkit.js
+  #
+  # if(collection.lu=="mapbiomas6"){
+  #   lu<-ee$Image("projects/mapbiomas-workspace/public/collection6/mapbiomas_collection60_integration_v1")
+  #   legend.lu<-read.csv(system.file("extdata","MB.col6.legend.csv",package="ecors"))
+  #   if(sum(years<1985)+sum(years>2020)>0){stop("\nDates for MapBiomas Collection 6 must be between 1985 and 2020")}
+  # }
 
-  if(collection.lu=="mapbiomas6"){
-    lu<-ee$Image("projects/mapbiomas-workspace/public/collection6/mapbiomas_collection60_integration_v1")
-    legend.lu<-read.csv(system.file("extdata","MB.col6.legend.csv",package="ecors"))
-    if(sum(years<1985)+sum(years>2020)>0){stop("\nDates for MapBiomas Collection 6 must be between 1985 and 2020")}
+  if(collection.lu=="mapbiomas9"){
+    lu<-ee$Image("projects/mapbiomas-public/assets/brazil/lulc/collection9/mapbiomas_collection90_integration_v1")
+    legend.lu<-read.csv(system.file("extdata","MB.col6.legend.csv",package="ecors"))                                #TODO: ATUALIZAR
+    if(sum(years<1985)+sum(years>2023)>0){stop("\nDates for MapBiomas Collection 9 must be between 1985 and 2023")}
   }
 
   lu<-lu$select(paste0("classification_",years))
