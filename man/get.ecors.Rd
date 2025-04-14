@@ -22,6 +22,7 @@ get.ecors(
   resolution,
   eval.area = "site",
   pOK = 0.8,
+  singlepixel = F,
   c.dist,
   clouds.sentinel = NULL,
   c.prob = NULL,
@@ -68,7 +69,7 @@ get.ecors(
 
 \item{eval.area}{choose evaluated area for quality control: site or samples.}
 
-\item{pOK}{minimum proportion of pixels aproved in quality control on the evaluated area to use a image.}
+\item{pOK}{minimum proportion of pixels aproved in quality control on the evaluated area to use a image. Use NULL if want use all images.}
 
 \item{c.dist}{additional distance (m) around pre-identified clouds that will be disregarded in the mask (when clouds.sentinel="CDI", c.dist should be multiples of 100 m). Usefull to avoid false negative cloud detection in cloud edges.}
 
@@ -106,21 +107,28 @@ Get data from Google Earth Engine for your study site and integrate with study p
 \details{
 Currently ecors supports the following remote sensing data collections:
 
+#' \cr
+Landsat 9
+\itemize{
+\item "LANDSAT/LC09/C02/T1_L2" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_L2}{Collection 2 - Surface Reflectance}
+\item "LANDSAT/LC09/C02/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_TOA}{Collection 2 - Top of Atmosphere Reflectance}
+\item "LANDSAT/LC09/C02/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1}{Collection 2 - Raw Images}
+}
+
 \cr
 Landsat 8
 \itemize{
 \item "LANDSAT/LC08/C02/T1_L2" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2}{Collection 2 - Surface Reflectance}
-\item "LANDSAT/LC08/C01/T1_SR" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR}{Collection 1 - Surface Reflectance}
-\item "LANDSAT/LC08/C01/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_TOA}{Collection 1 - Top of Atmosphere Reflectance}
-\item "LANDSAT/LC08/C01/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1}{Collection 1 - Raw Images}
+\item "LANDSAT/LC08/C02/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA}{Collection 2 - Top of Atmosphere Reflectance}
+\item "LANDSAT/LC08/C02/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1}{Collection 2 - Raw Images}
 }
 
 \cr
 Landsat 7
 \itemize{
 \item "LANDSAT/LE07/C02/T1_L2" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2}{Collection 2 - Surface Reflectance}
-\item "LANDSAT/LE07/C01/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA}{Collection 1 - Top of Atmosphere Reflectance}
-\item "LANDSAT/LE07/C01/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1}{Collection 1 - Raw Images}
+\item "LANDSAT/LE07/C02/T1_TOA" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA}{Collection 2 - Top of Atmosphere Reflectance}
+\item "LANDSAT/LE07/C02/T1" \href{https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1}{Collection 2 - Raw Images}
 }
 
 \cr
@@ -152,10 +160,19 @@ d2020<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer
     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="month", composite="mean")
 
+d.sentinel<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
+        eval.area="samples", projected=F, custom.crs=32723,
+        collection="COPERNICUS/S2_SR", start=c("2020-03-01"), end=c("2020-03-10"),
+        bands.eval=NULL, bands.vis=T, indices=NULL, resolution=10,
+        pOK=0, c.prob=NULL, c.dist=100, clouds.sentinel="CDI", cirrus.threshold=0.01, NIR.threshold=0.15, CDI.threshold=-0.5, dmax.shadow=300,
+        seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), group.by="month", composite=NULL)
+
 }
 \references{
 Pixel quality control information: \cr
 Frantz, D., Hass, E., Uhl, A., Stoffels, J., & Hill, J. (2018). Improvement of the Fmask algorithm for Sentinel-2 images: Separating clouds from bright surfaces based on parallax effects. Remote sensing of environment, 215, 471-481. \cr
+\url{https://www.usgs.gov/media/files/landsat-8-9-olitirs-collection-2-level-1-data-format-control-book} \cr
+\url{https://www.usgs.gov/media/files/landsat-8-9-olitirs-collection-2-level-2-data-format-control-book} \cr
 \url{https://www.usgs.gov/media/files/landsat-7-etm-collection-2-level-2-data-format-control-book} \cr
 \url{https://www.usgs.gov/media/files/landsat-4-5-tm-collection-2-level-2-data-format-control-book} \cr
 \url{https://www.usgs.gov/media/files/landsat-8-collection-1-land-surface-reflectance-code-product-guide} \cr

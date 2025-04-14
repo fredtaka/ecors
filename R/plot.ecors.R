@@ -16,7 +16,7 @@
 #' @details
 #' Argument ecors.type selects which processing level of get.ecors will be ploted. Option "original" use all images available in the period without processing, "filtered" use only images approved in get.ecors quality control.
 #' Option "mask" use same images as the previous one but with bad pixels masked, "composite" use compositions performed on the images of the previous option.
-#' Options "filtered|mask" and "filtered+mask" show images from both collections. Option 2 and 3 show images from both collections, in the first the images are toggled with the slider and in the last option the images from both collections are stacked. in the first the images are toggled with the slider and in the last option the images from both collections are stacked
+#' Options "filtered|mask" and "filtered+mask" show images from both collections: the former shows images toggled with a slider bar, the latter shows stacked images
 #'
 #' @return
 #' Google Earth Engine containers objects are exported to .GlobalEnv to be used in rgee functions and avoid errors (elapsed time limit):

@@ -2,6 +2,7 @@
 % Please edit documentation in R/ecors-package.R
 \docType{package}
 \name{ecors}
+\alias{ecors-package}
 \alias{ecors}
 \title{ecors: Remote Sensing data acquisition and processing for ecology with Google Earth Engine}
 \description{
@@ -39,4 +40,8 @@ Misc
 \item \url{https://earthengine.google.com/}
 \item \url{https://github.com/r-spatial/rgee/} or \link{rgee}
 }
+}
+\author{
+\strong{Maintainer}: Frederico Takahashi \email{fredtaka@gmail.com} (\href{https://orcid.org/0000-0001-9410-7885}{ORCID})
+
 }

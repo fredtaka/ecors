@@ -28,7 +28,7 @@
 #'
 #' lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
 #'      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
-#'      collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.samples",
+#'      collection.lu="mapbiomas9", years=c(2000,2010), resolution=30, evaluate="surroundings.samples",
 #'      buffer1=500, buffer2=1000, buffer3=2000, cumulative.surroundings=F)
 #'
 #' table2000_2010<-quantify.lu.ecors(x=lu2000_2010, save.format=c("ods"))
@@ -197,12 +197,17 @@ quantify.lu.ecors<-function(x, save.format="ods", save.metadata=T, spreadsheet.f
         stop("File results_quantify_lu.ods already exists in the selected directory:  (", file.path(spreadsheet.folder), "). \nChange the name or location of that file before proceeding.")}
       for(buf in 1:length(results.lu)){
         if(names(results.lu)[buf]=="polygon_info"){
-          write_ods(results.lu[["polygon_info"]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
-                    sheet="polygon_info",append=T)
-        } else {
+          if(buf==1){write_ods(results.lu[["polygon_info"]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
+                               sheet="polygon_info",append=F)  }
+          if(buf>1){write_ods(results.lu[["polygon_info"]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
+                              sheet="polygon_info",append=T)  }
+        }
+        if(names(results.lu)[buf]!="polygon_info"){
           for(pol in 1:length(results.lu[[1]])){
-            write_ods(results.lu[[buf]][[pol]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
-                      sheet=paste0(names(results.lu[buf]),"_",names(results.lu[[buf]][pol])),append=T)
+            if(pol==1){write_ods(results.lu[[buf]][[pol]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
+                      sheet=paste0(names(results.lu[buf]),"_",names(results.lu[[buf]][pol])),append=F) }
+            if(pol>1){write_ods(results.lu[[buf]][[pol]],path=paste0(file.path(spreadsheet.folder,sep=""),"results_quantify_lu.ods"),
+                                 sheet=paste0(names(results.lu[buf]),"_",names(results.lu[[buf]][pol])),append=T) }
           }#apesar dos nomes, funciona também com polígono sem buffer
         }
       }

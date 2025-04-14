@@ -8,7 +8,7 @@ Description: It simplifies the acquisition of data in Google Earth Engine and pe
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2
 Depends:
   R (>= 4.2.1), rgee (>= 1.1.4), sf (>= 1.0-7), dplyr
 Imports:

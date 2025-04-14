@@ -12,7 +12,7 @@ get.lu.ecors(
   id.column = 1,
   projected = FALSE,
   custom.crs = NULL,
-  collection.lu = "mapbiomas6",
+  collection.lu = "mapbiomas9",
   years,
   resolution = 30,
   evaluate,
@@ -71,10 +71,12 @@ FAL.IBGE.JBB<-sf::st_read(system.file("extdata/FAL.IBGE.JBB.gpkg", package="ecor
 test.points<-sf::st_read(system.file("extdata/Points_tests.gpkg", package="ecors"))
 test.plots<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="ecors"))
 
+#Inilialize rgee package as described in: https://github.com/r-spatial/rgee/issues/355#issuecomment-1901404132
+
 # Get data (projecting to UTM 32S zone to performe buffer operations)
 lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots,
      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
-     collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
+     collection.lu="mapbiomas9", years=c(2000,2010), resolution=30, evaluate="surroundings.site",
      buffer1=5000, buffer2=10000, buffer3=NULL, cumulative.surroundings=F)
 
 

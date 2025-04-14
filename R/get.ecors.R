@@ -10,7 +10,7 @@
 #' @param buffer.plots radius (m) of buffer of plots.
 #' @param projected are the provided sf objects projected? (scale = m)
 #' @param custom.crs choose a crs code to project sf objects prior to buffer processing.
-#' @param pOK minimum proportion of pixels aproved in quality control on the evaluated area to use a image.
+#' @param pOK minimum proportion of pixels aproved in quality control on the evaluated area to use a image. Use NULL if want use all images.
 #' @param c.dist additional distance (m) around pre-identified clouds that will be disregarded in the mask (when clouds.sentinel="CDI", c.dist should be multiples of 100 m). Usefull to avoid false negative cloud detection in cloud edges.
 #' @param collection Google Earth Engine collection name.
 #' @param start initial date (year-month-day).
@@ -48,9 +48,6 @@
 #' \item "LANDSAT/LC08/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2)
 #' \item "LANDSAT/LC08/C02/T1_TOA" [Collection 2 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_TOA)
 #' \item "LANDSAT/LC08/C02/T1" [Collection 2 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1)
-#' \item "LANDSAT/LC08/C01/T1_SR" [Collection 1 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR)
-#' \item "LANDSAT/LC08/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_TOA)
-#' \item "LANDSAT/LC08/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1)
 #' }
 #'
 #' \cr
@@ -59,8 +56,6 @@
 #' \item "LANDSAT/LE07/C02/T1_L2" [Collection 2 - Surface Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2)
 #' \item "LANDSAT/LE07/C02/T1_TOA" [Collection 2 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA)
 #' \item "LANDSAT/LE07/C02/T1" [Collection 2 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1)
-#' \item "LANDSAT/LE07/C01/T1_TOA" [Collection 1 - Top of Atmosphere Reflectance](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_TOA)
-#' \item "LANDSAT/LE07/C01/T1" [Collection 1 - Raw Images](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1)
 #' }
 #'
 #' \cr
@@ -111,6 +106,13 @@
 #'     pOK=0.3, c.prob=NULL, c.dist=100, clouds.sentinel=NULL, cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
 #'     seasons=list(s1=c(11,12,1,2), s2=c(3,4), s3=c(5,6,7,8), s4=c(9,10)), group.by="month", composite="mean")
 #'
+#' d.sentinel<-get.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.plots, buffer.points=500, buffer.plots=500,
+#'         eval.area="samples", projected=F, custom.crs=32723,
+#'         collection="COPERNICUS/S2_SR", start=c("2020-03-01"), end=c("2020-03-10"),
+#'         bands.eval=NULL, bands.vis=T, indices=NULL, resolution=10,
+#'         pOK=0, c.prob=NULL, c.dist=100, clouds.sentinel="CDI", cirrus.threshold=0.01, NIR.threshold=0.15, CDI.threshold=-0.5, dmax.shadow=300,
+#'         seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), group.by="month", composite=NULL)
+#'
 #' @import rgee
 #' @import rgeeExtra
 #' @import googledrive
@@ -121,7 +123,7 @@
 get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.points=1, buffer.plots=0,
                     projected=FALSE, custom.crs=NULL,
                     collection, start, end, bands.eval=NULL, bands.vis=T, indices=c("NDVI", "EVI", "NBR"), resolution,
-                    eval.area="site", pOK=0.8, c.dist, clouds.sentinel=NULL, c.prob=NULL,
+                    eval.area="site", pOK=0.8, singlepixel=F, c.dist, clouds.sentinel=NULL, c.prob=NULL,
                     cirrus.threshold=NULL, NIR.threshold=NULL, CDI.threshold=NULL, dmax.shadow=NULL,
                     seasons=list(s1=c(), s2=c(), s3=c(), s4=c()), group.by="month", composite=NULL,
                     online.storage="drive")
@@ -129,9 +131,9 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
 
 {
 
-  if(is.null(online.storage)){ee_Initialize(user = 'ndef', drive = F, gcs = F)}
-  if(online.storage=="gcs"){ee_Initialize(user = 'ndef', drive = F, gcs = T)}
-  if(online.storage=="drive"){ee_Initialize(user = 'ndef', drive = T, gcs = F)}
+  if(is.null(online.storage)){ee_Initialize(drive = F, gcs = F)}
+  if(online.storage=="gcs"){ee_Initialize(drive = F, gcs = T)}
+  if(online.storage=="drive"){ee_Initialize(drive = T, gcs = F)}
 
   #############################################
   ##### CONFIGURAÇÕES DAS COLEÇÕES ############
@@ -146,14 +148,9 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     "LANDSAT/LC08/C02/T1_L2",
     "LANDSAT/LC08/C02/T1_TOA",
     "LANDSAT/LC08/C02/T1",
-    "LANDSAT/LC08/C01/T1_SR",
-    "LANDSAT/LC08/C01/T1_TOA",
-    "LANDSAT/LC08/C01/T1",
     "LANDSAT/LE07/C02/T1_L2",
     "LANDSAT/LE07/C02/T1_TOA",
     "LANDSAT/LE07/C02/T1",
-    "LANDSAT/LE07/C01/T1_TOA",
-    "LANDSAT/LE07/C01/T1",
     "NASA/GPM_L3/IMERG_V06",
     "NASA/GPM_L3/IMERG_MONTHLY_V06")==F){stop(collection,"\nColeção não suportada. Consulte a lista de opções na documentação.\n")}
 
@@ -213,7 +210,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     valOK<-c(0)
   }
 
-  ### TODO: inserir LS9 e Coleção 2 do ToA e Raw do LS8 e LS7
+  ### TODO: inserir LS9
   #estudar diferença do QA_PIXEL quando o Bit 2 é usado (ex. LS8 C2 surface Reflectance) e quando não é usado (ex. LS8 C2 ToA e Raw)
   #indicador de qualidade parece razoavelmente padronizado na C2 (que é totalmente diferente da C1)
   # https://www.binary-code.org/binary/16bit/0000000001000000/
@@ -237,24 +234,24 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     valOK<-c(21824) #inclui água com o código 21952 . #TODO Entretanto isso traz implicação no comando imagem<-imagem$select(banda.qualidade)$eq(valOK)  #TODO
   }
 
-  ### Landsat 8 (coleção 1) - Surface Reflectance
-  if(collection=="LANDSAT/LC08/C01/T1_SR"){
-    #datas
-    periodo.sat<-list(start=as.Date("2013-04-11"),end=as.Date("3000-01-01"))
-
-    #visualização
-    d.vpar<-list(bands=c("B4","B3","B2"),min=0,max=3000,gamma=1.4)
-    d.vpar.pan<-NULL
-
-    #bandas dos indices
-    lista.bandas.indices<-list(BLUE="B2",RED="B4",NIR="B5",SWIR2="B7")
-
-    #pixels de qualidade
-    banda.qualidade<-"pixel_qa"
-    banda.qualidade.auxiliar<-NULL
-    tipo.qualidade.auxiliar<-NULL
-    valOK<-c(322)
-  }
+  # ### Landsat 8 (coleção 1) - Surface Reflectance
+  # if(collection=="LANDSAT/LC08/C01/T1_SR"){
+  #   #datas
+  #   periodo.sat<-list(start=as.Date("2013-04-11"),end=as.Date("3000-01-01"))
+  #
+  #   #visualização
+  #   d.vpar<-list(bands=c("B4","B3","B2"),min=0,max=3000,gamma=1.4)
+  #   d.vpar.pan<-NULL
+  #
+  #   #bandas dos indices
+  #   lista.bandas.indices<-list(BLUE="B2",RED="B4",NIR="B5",SWIR2="B7")
+  #
+  #   #pixels de qualidade
+  #   banda.qualidade<-"pixel_qa"
+  #   banda.qualidade.auxiliar<-NULL
+  #   tipo.qualidade.auxiliar<-NULL
+  #   valOK<-c(322)
+  # }
 
   ### Landsat 8 - Top of Atmosphere
   if(collection=="LANDSAT/LC08/C01/T1_TOA"){
@@ -294,7 +291,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     valOK<-c(2720)
   }
 
-  ### Landsat 7 (coleção 2)
+  ### Landsat 7 SR (coleção 2)
   if(collection=="LANDSAT/LE07/C02/T1_L2"){
     #datas
     periodo.sat<-list(start=as.Date("1999-01-01"),end=as.Date("3000-01-01"))
@@ -313,8 +310,8 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     valOK<-c(5440)
   }
 
-  ### Landsat 7 - Top of Atmosphere
-  if(collection=="LANDSAT/LE07/C01/T1_TOA"){
+  ### Landsat 7 - Top of Atmosphere (coleção 2)
+  if(collection=="LANDSAT/LE07/C02/T1_TOA"){
     #datas
     periodo.sat<-list(start=as.Date("1999-01-01"),end=as.Date("3000-01-01"))
 
@@ -326,14 +323,14 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     lista.bandas.indices<-list(BLUE="B1",RED="B3",NIR="B4",SWIR2="B7")
 
     #pixels de qualidade
-    banda.qualidade<-"BQA"
+    banda.qualidade<-"QA_PIXEL"
     banda.qualidade.auxiliar<-NULL
     tipo.qualidade.auxiliar<-NULL
-    valOK<-c(672)
+    valOK<-c(5440)
   }
 
   ### Landsat 7 - Raw
-  if(collection=="LANDSAT/LE07/C01/T1"){
+  if(collection=="LANDSAT/LE07/C02/T1"){
     #datas
     periodo.sat<-list(start=as.Date("1999-01-01"),end=as.Date("3000-01-01"))
 
@@ -345,10 +342,10 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
     lista.bandas.indices<-list(BLUE="B1",RED="B3",NIR="B4",SWIR2="B7")
 
     #pixels de qualidade
-    banda.qualidade<-"BQA"
+    banda.qualidade<-"QA_PIXEL"
     banda.qualidade.auxiliar<-NULL
     tipo.qualidade.auxiliar<-NULL
-    valOK<-c(672)
+    valOK<-c(5440)
   }
 
   ### GPM: Global Precipitation Measurement (GPM) v6
@@ -416,6 +413,8 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   if(is.null(c.dist)==F){if(c.dist==0){c.dist<-NULL}}
   if(is.null(c.prob)==F & ifelse(is.null(tipo.qualidade.auxiliar),T,"c.prob"%in%tipo.qualidade.auxiliar==F)){stop("Selected collection do not support cloud probability quality criterion. Set c.prob=NULL")}
   if(is.null(c.prob)==F){if(c.prob==0){c.prob<-NULL}}
+
+  if(is.null(pOK)==F){if(pOK==0){pOK<-NULL}}
 
   if(is.null(clouds.sentinel)==F){
     if(collection%in%c("COPERNICUS/S2_SR","COPERNICUS/S2")==F){stop("Selected collection do not support clouds.sentinel methods. Set clouds.sentinel=NULL")}
@@ -586,7 +585,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
   #### Filtrando imagens boas no sítio ######
   ###########################################
 
-  if(is.null(banda.qualidade)==F){
+  if(is.null(banda.qualidade)==F | is.null(pOK)==F){
     # Sentinel - Identificação de núvens e sombras baseada no CDI
     # Frantz, D., Hass, E., Uhl, A., Stoffels, J., & Hill, J. (2018). Improvement of the Fmask algorithm for Sentinel-2 images: Separating clouds from bright surfaces based on parallax effects. Remote sensing of environment, 215, 471-481.
     indexJoin<-function(collectionA, collectionB, propertyName) {
@@ -619,7 +618,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
         sombra<-sombra$multiply(dark_pixels)
 
         customQA<-nuvemfocal$add(sombra)$gt(0)$rename("customQA")
-        customQA<-customQA$focalMode(1.5)
+        #customQA<-customQA$focalMode(1.5)
         imagem<-imagem$addBands(customQA)
         return(imagem)
       }
@@ -641,7 +640,7 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
         sombra<-sombra$multiply(dark_pixels)
 
         customQA<-nuvemfocal$add(sombra)$gt(0)$rename("customQA")
-        customQA<-customQA$focalMode(1.5)
+        #customQA<-customQA$focalMode(1.5)
         imagem<-imagem$addBands(customQA)
         return(imagem)
       }
@@ -753,15 +752,22 @@ get.ecors<-function(site=NULL, points=NULL, plots=NULL, id.column=1, buffer.poin
       }
     }
 
-    #Pixels na área (não muda ao longo do tempo)
-    npixel.eval.area<-colle.quali[[1]]$reduceRegion(
-      reducer=ee$Reducer$count(),
-      geometry=eval.area.gee,
-      scale=resolution)$get(banda.qualidade)$getInfo()
+    if(is.null(pOK)==F | singlepixel==T){
+      #Pixels na área (não muda ao longo do tempo)
+      if(singlepixel==F){
+        npixel.eval.area<-colle.quali[[1]]$reduceRegion(
+          reducer=ee$Reducer$count(),
+          geometry=eval.area.gee,
+          scale=resolution)$get(banda.qualidade)$getInfo()
 
-    minpixelOK<-pOK*npixel.eval.area
+        minpixelOK<-pOK*npixel.eval.area
+      } else {minpixelOK<-0} #will be converted to integer, so "greater_than" 0 works fine
 
     pixelOK.filt<-pixelOK$filterMetadata("npixelOK","greater_than",minpixelOK)
+    } else {
+      pixelOK.filt<-pixelOK #mantido nome impreciso por compatibilidade adiante
+    }
+
 
   } #fim: imagens sem pixel de qualidade desviam esse bloco)
 

@@ -46,7 +46,7 @@ test.retangles<-sf::st_read(system.file("extdata/Plots_tests.gpkg", package="eco
 # Get lu.ecors object (buffer size will not be considered in dist.lu.ecors)
 lu2000_2010<-get.lu.ecors(site=FAL.IBGE.JBB, points=test.points, plots=test.retangles,
      polygons=NULL, id.column=1, projected=F, custom.crs=32723,
-     collection.lu="mapbiomas6", years=c(2000,2010), resolution=30, evaluate="distance.samples",
+     collection.lu="mapbiomas9", years=c(2000,2010), resolution=30, evaluate="distance.samples",
      buffer1=NULL, buffer2=NULL, buffer3=NULL, cumulative.surroundings=F)
      #if you set evaluate to "surroundings.samples" the result will be the same, but will spend extra time to generate bufferes (do not used here).
 
